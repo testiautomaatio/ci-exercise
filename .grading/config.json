@@ -1,0 +1,133 @@
+{
+  "name": "Workout API CI exercise",
+  "description": "Checks the application log for startup and HTTP response coverage.",
+  "tests": [
+    {
+      "name": "Application started",
+      "description": "The application logged its listening message.",
+      "score": 20,
+      "run": "grep -Fxq -- 'Workout API listening on http://localhost:3000' app/app.log",
+      "skipRemainingOnFailure": true
+    },
+    {
+      "name": "GET /: 200",
+      "description": "The public root endpoint returned 200.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> GET /(\\?[^ ]*)? 200( |$)' app/app.log"
+    },
+    {
+      "name": "GET /health: 200",
+      "description": "The public health endpoint returned 200.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> GET /health(\\?[^ ]*)? 200( |$)' app/app.log"
+    },
+    {
+      "name": "POST /auth/login: 200",
+      "description": "A login request returned 200.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> POST /auth/login(\\?[^ ]*)? 200( |$)' app/app.log"
+    },
+    {
+      "name": "POST /auth/login: 400",
+      "description": "An invalid login request returned 400.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> POST /auth/login(\\?[^ ]*)? 400( |$)' app/app.log"
+    },
+    {
+      "name": "POST /auth/login: 401",
+      "description": "A login request with invalid credentials returned 401.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> POST /auth/login(\\?[^ ]*)? 401( |$)' app/app.log"
+    },
+    {
+      "name": "GET /workouts: 200",
+      "description": "A workout list request returned 200.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> GET /workouts(\\?[^ ]*)? 200( |$)' app/app.log"
+    },
+    {
+      "name": "GET /workouts: 401",
+      "description": "An unauthorized workout list request returned 401.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> GET /workouts(\\?[^ ]*)? 401( |$)' app/app.log"
+    },
+    {
+      "name": "POST /workouts: 201",
+      "description": "A workout creation request returned 201.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> POST /workouts(\\?[^ ]*)? 201( |$)' app/app.log"
+    },
+    {
+      "name": "POST /workouts: 400",
+      "description": "An invalid workout creation request returned 400.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> POST /workouts(\\?[^ ]*)? 400( |$)' app/app.log"
+    },
+    {
+      "name": "POST /workouts: 401",
+      "description": "An unauthorized workout creation request returned 401.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> POST /workouts(\\?[^ ]*)? 401( |$)' app/app.log"
+    },
+    {
+      "name": "GET /workouts/:id: 200",
+      "description": "A workout lookup returned 200.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> GET /workouts/[^/? ]+(\\?[^ ]*)? 200( |$)' app/app.log"
+    },
+    {
+      "name": "GET /workouts/:id: 404",
+      "description": "A workout lookup returned 404.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> GET /workouts/[^/? ]+(\\?[^ ]*)? 404( |$)' app/app.log"
+    },
+    {
+      "name": "GET /workouts/:id: 401",
+      "description": "An unauthorized workout lookup returned 401.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> GET /workouts/[^/? ]+(\\?[^ ]*)? 401( |$)' app/app.log"
+    },
+    {
+      "name": "PUT /workouts/:id: 200",
+      "description": "A workout update returned 200.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> PUT /workouts/[^/? ]+(\\?[^ ]*)? 200( |$)' app/app.log"
+    },
+    {
+      "name": "PUT /workouts/:id: 400",
+      "description": "An invalid workout update returned 400.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> PUT /workouts/[^/? ]+(\\?[^ ]*)? 400( |$)' app/app.log"
+    },
+    {
+      "name": "PUT /workouts/:id: 404",
+      "description": "An update of a nonexistent workout returned 404.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> PUT /workouts/[^/? ]+(\\?[^ ]*)? 404( |$)' app/app.log"
+    },
+    {
+      "name": "PUT /workouts/:id: 401",
+      "description": "An unauthorized workout update returned 401.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> PUT /workouts/[^/? ]+(\\?[^ ]*)? 401( |$)' app/app.log"
+    },
+    {
+      "name": "DELETE /workouts/:id: 204",
+      "description": "A workout deletion returned 204.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> DELETE /workouts/[^/? ]+(\\?[^ ]*)? 204( |$)' app/app.log"
+    },
+    {
+      "name": "DELETE /workouts/:id: 404",
+      "description": "Deletion of a nonexistent workout returned 404.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> DELETE /workouts/[^/? ]+(\\?[^ ]*)? 404( |$)' app/app.log"
+    },
+    {
+      "name": "DELETE /workouts/:id: 401",
+      "description": "An unauthorized workout deletion returned 401.",
+      "score": 4,
+      "run": "grep -Eq -- '^--> DELETE /workouts/[^/? ]+(\\?[^ ]*)? 401( |$)' app/app.log"
+    }
+  ]
+}
