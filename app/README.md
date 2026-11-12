@@ -16,9 +16,19 @@ npm start
 
 The API listens at `http://localhost:3000`. Stop it with Ctrl+C. `GET /health` can be used to wait until the server responds.
 
+## Run with Docker Compose
+
+Alternatively, install Docker and Docker Compose, then run from the repository root:
+
+```bash
+docker compose up --build
+```
+
+The API is available at `http://localhost:3000`. Stop it with Ctrl+C, then remove the container with `docker compose down`. Compose mounts the app directory at `/logs` so the log remains available at `app/app.log` on the host. Data remains in memory and is lost when the container stops.
+
 ## Logging
 
-Hono's request logger writes request methods, URLs, response status codes and timings to stdout and appends them to `app/app.log`. The file persists across restarts and is ignored by Git. The app must have permission to write to the `app` directory. URLs include query strings, so do not put passwords or tokens in them.
+Hono's request logger writes request methods, URLs, response status codes and timings to stdout and appends them to `app/app.log`. The file persists across restarts and is ignored by Git. The app must have permission to write to the `app` directory. `APP_LOG_PATH` can override the file location; Docker Compose uses it to write to the mounted directory. URLs include query strings, so do not put passwords or tokens in them.
 
 ## Public endpoints
 
