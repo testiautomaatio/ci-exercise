@@ -1,145 +1,39 @@
-[English version of this readme is available in the file readme.en.md](./readme.en.md)
+# CI-työnkulku ja rajapinnan testaus
 
-# RPA-haaste (robotic process automation)
+Tässä tehtävässä toteutat GitHub Actions -työnkulun, joka käynnistää sovelluksen ja suorittaa kirjoittamasi testit sitä vasten. Lähtötilanteessa repositoriossa ei ole valmista työnkulkua tai testisarjaa.
 
-Tässä tehtävässä sovelletaan Playwright-työkalua ohjelmistorobotiikan parissa. Tehtävän tarkoituksena on automatisoida tietojen siirtämistä yhdestä web-sovelluksesta toiseen.
+Testattava sovellus on [`app`-kansiossa](./app/README.md). Se tarjoaa yksinkertaisen workout-REST-rajapinnan. Lue sovelluksen README:stä käynnistysohjeet, rajapinnan osoitteet ja odotettu toiminta. Sovellus käyttää muistia, joten sen tiedot häviävät, kun prosessi pysäytetään.
 
-Tällaisesta ratkaisusta käytetään usein nimitystä "ohjelmistorobotiikka" tai Robotic Process Automation (RPA). Ohjelmistorobotti on käytännössä ohjelmisto, joka suorittaa ihmisen puolesta tietokoneella toistuvia tehtäviä, kuten tietojen syöttöä, kopiointia ja siirtoa järjestelmästä toiseen. Ohjelmistorobotiikkaa tarvitaan erityisesti silloin, kun järjestelmät eivät tarjoa rajapintoja tai muuta tapaa tietojen siirtoon tai eivät muuten ole suoraan teknisesti yhteensopivia.
+## Tausta ja oppimistavoitteet
 
-Vaikka tämän tehtävän tarkoitus ei ole opettaa ohjelmistorobotiikkaa, se tarjoaa hyvän soveltavan käyttötapauksen Playwright-työkalun käyttöön. Tehtävää ratkaistessasi pääset soveltamaan osaamistasi useamman samanaikaisen selainistunnon parissa sekä soveltamaan tietojen keräämistä ja syöttämistä tilanteissa, joissa dataa joudutaan hieman muokkaamaan ennen syöttämistä.
+Aiemmissa testaustehtävissä olet ehkä voinut kokeilla sovellusta käsin esimerkiksi painikkeita klikkaamalla. Tällä kertaa testattavalla sovelluksella ei ole käyttöliittymää: se tarjoaa rajapinnan toiselle kehitystiimille, joka voi myöhemmin integroida oman sovelluksensa siihen. Miten voit varmistaa, että rajapinta toimii odotetusti jo ennen kuin tuo käyttöliittymä on olemassa?
 
-Tehtäväpohjassa termit "test" ja "spec" on korvattu termillä "task", jotta tehtävän luonne ohjelmistorobotiikkana korostuisi paremmin. Käytännössä tehtävä kuitenkin toteutetaan Playwrightin testien avulla, joten voit hyödyntää kaikkia Playwrightin testikirjaston ominaisuuksia.
+Pääset valitsemaan itse, miten lähestyt ongelmaa! Voit käyttää tuttua testaustyökalua, kokeilla uutta tai rakentaa testit vaikkapa `curl`-komennoilla ja Bash-skripteillä. Olennaista on, että testit tarkistavat tulokset ja että ne voidaan suorittaa automaattisesti GitHub Actionsissa.
 
-Tehtävä tarkastetaan vaiheittain ja siitä voi saada merkittävän osan pisteistä, vaikka et saisikaan kaikkia tietoja siirrettyä.
+Tehtävän jälkeen osaat:
 
-> [!TIP]
-> Tämä repositorio sisältää development container -konfiguraation, joka on kuvattu [devcontainer.md-tiedostossa](./devcontainer.md). Kontin avulla voit välttää mahdolliset asennusongelmat ja käyttää valmista, eristettyä ympäristöä joko pilvipalvelussa tai paikallisesti.
-
-
-## Tehtävän ja testauksen lähtökohdat
-
-Tässä tehtävässä oletetaan, että olet suorittanut aikaisemmat tehtävät, joissa harjoiteltiin Playwright-projektin luontia ja asennusta sekä testien kirjoittamista ja suorittamista. Tämä tehtävärepositorio sisältää valmiiksi Playwright-projektin pohjan, jonka voit asentaa ja käynnistää seuraavasti:
-
-```bash
-npm install
-npm run tasks
-```
-
-`npm run tasks`-komento suorittaa testit chromiumilla ja luo raportin sekä trace-tiedostot. `tasks`-skripti on määritelty [`package.json`-tiedostossa](./package.json) ja sen tarkoituksena on tarjota lyhyempi komento testien suorittamiseen.
-
-Projektin suorittaminen edellyttää myös selainten asentamista, minkä olet toivottavasti tehnyt jo aikaisemmassa tehtävässä. Tarvittaessa [asenna esimerkiksi Chromium Playwrightin ohjeita seuraten](https://playwright.dev/docs/browsers).
-
+- testata REST-rajapintaa lähettämällä HTTP-pyyntöjä, käyttämällä autentikointia ja tarkistamalla vastauksia ja virhetilanteita
+- valita tehtävään sopivat työkalut ja asentaa niiden riippuvuudet automatisoidussa ympäristössä
+- rakentaa CI-työnkulun, joka käynnistää sovelluksen, odottaa sen valmistumista ja suorittaa testit
+- tulkita työnkulun tuloksia ja havaita testien tai sovelluksen käynnistyksen epäonnistumiset.
 
 > [!TIP]
-> Tehtäväpohjassa löytyy valmiina `tasks`-kansio, jossa valmiina [copyCars.task.ts](./tasks/copyCars.task.ts)-tiedosto. Voit halutessasi toteuttaa ratkaisusi tähän tiedostoon tai luoda uusia tiedostoja, kunhan Playwright löytää ne `tasks`-kansiosta. Esimerkkitiedostossa ei ole käytetty TypeScriptin ominaisuuksia, joten voit halutessasi nimetä sen uudelleen `.js`-päätteiseksi tiedostoksi ja kirjoittaa oman ratkaisusi JavaScriptillä (esim. `git mv copyCars.task.ts copyCars.task.js`).
-
+> Suosittelemme käyttämään kehitysympäristönä [GitHub Codespacesia](https://docs.github.com/en/codespaces/overview) tai paikallista [devcontaineria](https://code.visualstudio.com/docs/devcontainers/containers). Ne tarjoavat eristetyn ympäristön ja voivat helpottaa riippuvuuksien asentamista. Tässä repositoriossa ei ole valmista devcontainer-konfiguraatiota tai asennusskriptiä: Codespaces voi käyttää oletusympäristöä, ja paikallista devcontaineria varten voit luoda oman konfiguraation. Asenna sovelluksen ja valitsemasi testaustyökalun riippuvuudet käyttämääsi ympäristöön.
 
 ## Tehtävä
 
-> Subject: Help Needed: Transferring Our Fleet Data To A New System
->
-> Hi,
->
-> I'm the owner of AutoLegacy Oy, a small but stubbornly old-school fleet management company. Since the late 90s, we've been using a homegrown web system to keep track of all our vehicles. It's clunky, slow, insecure, and refuses to die—but it's finally time for an upgrade.
->
-> We've recently signed up for a shiny new fleet management system that works in a modern browser (hallelujah!). The catch? Our old system doesn't support exporting data or integrating with anything. There are no APIs nor CSV exports — just a painfully retro web interface where each car's data can be viewed one by one.
->
-> This is where I need your help.
->
-> Your task is to use Playwright to automate the transfer of our car records from the old system to the new one. You'll need to:
->
-> * Visit each car entry in the old system (https://rpa-exercise-legacy-system.pages.dev/).
->
-> * Extract all relevant details (e.g., registration number, model, year, mileage etc).
->
-> * Fill in the corresponding fields in the new system's web form (https://rpa-exercise-target-system.pages.dev/).
->
-> It's a bit like time-traveling with a clipboard. There are no room for errors, so each entry must be copied perfectly. In case of errors, the process must start over from the beginning.
->
-> Let me know if you run into any trouble. I'm happy to give you access credentials, screenshots, or nostalgic war stories from the days of dial-up internet.
->
-> Thanks in advance for helping us finally enter the 21st century.
->
-> Best regards,<br />
-> Helena Huoltokirja<br />
-> Owner, AutoLegacy Oy<br />
-> helena@localhost
+1. Tutustu rajapintaan ja käynnistä sovellus paikallisesti. Sovellus tarvitsee Node.js:n (vähintään version 22) ja npm:n.
+2. Kirjoita oma automaattinen testisarja, joka lähettää HTTP-pyyntöjä käynnissä olevaan sovellukseen ja tarkistaa vastaukset. Testaa kirjautuminen ja suojattujen pyyntöjen toiminta myös ilman kelvollista tokenia. Testaa vähintään workoutin luonti, listaus, haku, päivitys ja poisto sekä virhetilanteita, kuten virheelliset syötteet ja tuntematon ID. Varmista myös päivityksen ja poiston vaikutus. Suunnittele testit niin, etteivät ne riipu aiempien testiajojen tiedoista.
+3. Luo työnkulku `.github/workflows/`-kansioon. Määrittele sen käynnistymään vähintään push- ja pull request -tapahtumista. Käytä GitHubin ylläpitämiä uudelleenkäytettäviä actioneita repositorion hakemiseen ja Node.js-ympäristön asentamiseen, esimerkiksi [actions/checkout](https://github.com/actions/checkout) ja [actions/setup-node](https://github.com/actions/setup-node).
+4. Asenna työnkulussa sovelluksen riippuvuudet (`npm ci` sovelluskansiossa) sekä valitsemasi testaustyökalun kaikki riippuvuudet. Käynnistä sovellus taustalle samalla runnerilla, jolla testit suoritetaan. Odota, kunnes se vastaa HTTP-pyyntöihin, ennen kuin käynnistät testit; käytä aikarajaa, jotta työnkulku epäonnistuu, jos sovellus ei käynnisty.
+5. Suorita testisarjasi työnkulussa käynnissä olevaa sovellusta vasten. Varmista, että epäonnistunut testi tai käynnistysvirhe saa työnkulun epäonnistumaan. Lähetä testit, työnkulku ja mahdolliset riippuvuuksien määritykset GitHubiin ja tarkista suoritus repositorion Actions-välilehdeltä.
 
+Voit valita testaustavan ja -työkalun itse. Esimerkiksi [Robot Framework](https://robotframework.org/), [Vitest](https://vitest.dev/) tai [Bruno CLI](https://docs.usebruno.com/bru-cli/overview) sopivat tehtävään, mutta voit käyttää myös `curl`-komentoja ja Bash-skriptejä. Työkalun on oltava suoritettavissa komentoriviltä automatisoidussa ympäristössä: pelkkä graafinen käyttöliittymä tai VS Code -laajennus ei riitä. Huolehdi myös työkalun tarvitsemasta ajoympäristöstä, kuten Pythonista, ja tallenna riippuvuudet repositorioon toistettavaa asennusta varten.
 
-## Käytettävät sivustot
+## Vinkkejä
 
-Tehtävässä käytetään yllä esitetyn sähköpostin mukaisesti kahta erillistä verkkosivustoa, joista toinen on vanha ajoneuvorekisteri ja toinen uusi korvaava ajoneuvorekisteri. Tehtävässä sinun tulee siirtää tietoja vanhasta järjestelmästä uuteen.
-
-Vanha järjestelmä löytyy osoitteesta https://rpa-exercise-legacy-system.pages.dev/ ja uusi järjestelmä osoitteesta https://rpa-exercise-target-system.pages.dev/.
-
-[Vanha järjestelmä](https://rpa-exercise-legacy-system.pages.dev/) muistuttaa 90-luvun verkkosivustoa ja se on tarkoituksella toteutettu niin, että sen käyttöliittymä on hidas ja hieman epäkäytännöllinen. Järjestelmän salasana löytyy etusivulta esitäytettynä. Kirjautumisen jälkeen avautuvalla sivulla on listattuna useita autoja ja jokaisen auton tiedot on avattava erikseen. Näiden autojen tiedot tulee kopioida vanhasta järjestelmästä uuteen järjestelmään.
-
-[Uusi järjestelmä](https://rpa-exercise-target-system.pages.dev/) on astetta nykyaikaisempi, mutta yksinkertaisuuden vuoksi pelkistetty. Sivu pitää kirjaa syötetyistä autoista ja tarkastaa automaattisesti syötettyjen tietojen oikeellisuuden verraten niitä vanhan järjestelmän tietoihin. Mikäli tiedot eivät täsmää, näytetään käyttäjälle virheilmoitus, minkä lisäksi selaimen konsoliin lokitetaan tarkemmat tiedot virheistä. Jos siis kohtaat virheitä, tarkasta trace viewerin avulla selaimen konsoliin tulostuneet virheilmoitukset.
-
-Uusi järjestelmä ei tallenna syötettyjä tietoja pysyvästi, vaan tiedot nollautuvat aina sivua avattaessa tai päivitettäessä. Sinun ei siis tarvitse huolehtia testien alustamisesta tai tietojen poistamisesta testien suoritusten välillä.
-
-![Autojen kopiointi vanhasta järjestelmästä uuteen](./diagram.png)
-
-*__Vinkki:__ vanha järjestelmä on hidas ja sen tietoturvassa on puutteita. Voit kokeilla, josko pystyisit ohittamaan hitaan kirjautumisen ja pääsemään suoraan käsiksi autojen tietoihin. Tämä voi nopeuttaa tietojen siirtoa, mutta se ei ole pakollista. Tehtävässä on tarkoitus keskittyä automaation toteuttamiseen, ei tietoturvaan, emmekä yleisesti suosittele hyödyntämään tällaisia menetelmiä.*
-
-
-## Ratkaisun toteuttaminen
-
-Kun olet saanut projektin asennettua ja kokeillut manuaalisesti molempia sivustoja, voit toteuttaa tietojen siirron automatisoinnin. Automatisointi toteutetaan käytännössä kirjoittamalla "testi", joka käy läpi seuraavat vaiheet:
-
-1. Avaa vanhan järjestelmän etusivu ja kirjaudu sisään.
-2. Avaa vanhassa järjestelmässä jokaisen auton tiedot erikseen.
-3. Kopioi kunkin auton tiedot (rekisterinumero, merkki, malli jne.) uuteen järjestelmään.
-4. Tarkista, että tiedot on syötetty oikein ja että uusi järjestelmä ei ilmoita virheistä.
-5. Varmista lopuksi, että uuden järjestelmän sivulle ilmestyy teksti "You have completed the exercise!".
-
-Tämä tehtävä on luonteeltaan erilainen kuin aikaisemmat ja se voidaan ratkaista usealla eri tavalla. Voit esimerkiksi kerätä ensin kaikki vanhan järjestelmän autotietueet yhteen taulukkoon (array) ja lopuksi syöttää tiedot taulukosta uuteen järjestelmään.
-
-Vaihtoehtoisesti voit avata Playwrightin avulla useita välilehtiä tai selainikkunoita ja käyttää molempia sivustoja rinnakkain, kuten tässä esimerkissä:
-
-```ts
-import { test as task } from '@playwright/test';
-
-task('this task uses two tabs', async ({ page, browser, context }) => {
-    await page.goto('https://tailwindcss.com/');
-
-    const secondPage = await context.newPage();
-    await secondPage.goto('https://stackoverflow.com/search?q=how+to+center+a+div');
-});
-
-task('this task uses two browser windows', async ({ page, browser, context }) => {
-    await page.goto('https://git-scm.com/docs/git-merge');
-
-    const secondPage = await browser.newPage();
-    await secondPage.goto('https://stackoverflow.com/search?q=how+to+exit+vim');
-});
-```
-
-Katso lisätietoja Playwrightin dokumentaatiosta sivuilta ["Pages"](https://playwright.dev/docs/pages), ["BrowserContext"](https://playwright.dev/docs/api/class-browsercontext) ja ["Browser"](https://playwright.dev/docs/api/class-browser).
-
-Tämän tehtävän ratkaisemisessa voi olla hyvä kokeilla myös Playwrightin [Page Object Model](https://playwright.dev/docs/pom)-mallia, joka auttaa jäsentämään koodia paremmin ja tekemään siitä uudelleenkäytettävämpää. Voit luoda esimerkiksi erilliset POM-luokat vanhalle ja uudelle järjestelmälle.
-
-
-## Tehtävän automaattinen arviointi
-
-Kun olet saanut tehtävän valmiiksi tai päässyt siinä alkuun, voit palauttaa ratkaisusi automaattista tarkastusta varten. Tehtävä tarkastetaan vaiheittain ja siitä voi saada merkittävän osan pisteistä, vaikka et saisi kaikkia tietoja siirrettyä.
-
-Lisää testisi versionhallintaan ja lähetä muutokset GitHubiin `git status`, `git add`, `git commit` ja `git push` -komennoilla. `push`-komennon jälkeen käynnistyy GitHub action -automaattitarkastus, joka suorittaa testit ja antaa niistä palautteen. Näet palautteen GitHub-repositoriosi actions-välilehdeltä.
-
-Automaattisessa tarkastuksessa käytetään Chromium-selainta ja testit suoritetaan yksi kerrallaan headless-tilassa. Suosittelemme varmistamaan, että testit toimivat paikallisesti seuraavalla komennolla ennen palautusta:
-
-```bash
-npx playwright test --reporter="list,html" --project=chromium --trace=on
-
-# tai:
-npm run tasks
-```
-
-Tarvittaessa tutki actions-välilehden raporttia ja testituloksia. Myös selaimen konsoliin tulostuneiden virheilmoitusten tutkimisesta on apua mahdollisten pienten muotoseikkojen korjaamisessa. Voit palauttaa tehtävän uudelleen useita kertoa tehtävän määräaikaan asti.
-
-
-## Materiaalista
-
-Tämän tehtävän on kehittänyt Teemu Havulinna ja se on lisensoitu [Creative Commons BY-NC-SA -lisenssillä](https://creativecommons.org/licenses/by-nc-sa/4.0/).
-
-Tehtävän luonnissa on hyödynnetty kielimalleja ja tekoälytyökaluja, kuten GitHub Copilot ja ChatGPT.
+- Työnkulun komennot suoritetaan runnerilla; palvelin ja testit voivat käyttää samaa `http://localhost:3000`-osoitetta. Työvaiheiden oletushakemisto on repositorion juuri, joten huomioi `app`-kansio asennuksessa ja käynnistyksessä.
+- Bashissa `&` käynnistää komennon taustalle. Katso [Bashin ohje taustaprosesseista](https://www.gnu.org/software/bash/manual/html_node/Lists.html) ja [GitHub Actionsin työnkulun syntaksi](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax). Pelkkä taustakäynnistys ei tarkoita, että palvelin on jo valmis.
+- Voit odottaa valmiutta esimerkiksi kokeilemalla `GET /health` -pyyntöä `curl`-komennolla toistuvasti rajatun ajan. Päätepiste ei vaadi tokenia, ja se vastaa `200`, kun palvelin vastaa. Huomaa, että kyseessä on vain esimerkinomainen tarkistus: se ei tarkista sovelluksen tilaa tai riippuvuuksia. Selvitä myös, miten havaitset käynnistysvirheen ja miten näet sovelluksen lokit epäonnistuessa.
+- Sovelluksen README sisältää esimerkkikäyttäjät ja ohjeet tokenin hakemiseen. Hae token testiajon aikana, sillä se vanhenee ja muuttuu sovelluksen käynnistyessä uudelleen.
+- Kun testaat yksittäistä workoutia, käytä luontivastauksen ID:tä. Sovellus käynnistyy tyhjällä tietovarastolla, mutta testit voivat muuttaa sitä saman ajon aikana.
