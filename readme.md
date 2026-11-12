@@ -27,6 +27,14 @@ Tehtävän jälkeen osaat:
 3. Luo työnkulku `.github/workflows/`-kansioon. Määrittele sen käynnistymään vähintään push- ja pull request -tapahtumista. Käytä GitHubin ylläpitämiä uudelleenkäytettäviä actioneita repositorion hakemiseen ja Node.js-ympäristön asentamiseen, esimerkiksi [actions/checkout](https://github.com/actions/checkout) ja [actions/setup-node](https://github.com/actions/setup-node).
 4. Asenna työnkulussa sovelluksen riippuvuudet (`npm ci` sovelluskansiossa) sekä valitsemasi testaustyökalun kaikki riippuvuudet. Käynnistä sovellus taustalle samalla runnerilla, jolla testit suoritetaan. Odota, kunnes se vastaa HTTP-pyyntöihin, ennen kuin käynnistät testit; käytä aikarajaa, jotta työnkulku epäonnistuu, jos sovellus ei käynnisty.
 5. Suorita testisarjasi työnkulussa käynnissä olevaa sovellusta vasten. Varmista, että epäonnistunut testi tai käynnistysvirhe saa työnkulun epäonnistumaan. Lähetä testit, työnkulku ja mahdolliset riippuvuuksien määritykset GitHubiin ja tarkista suoritus repositorion Actions-välilehdeltä.
+6. Lisää työnkulkuusi testien jälkeen samaan jobiin seuraava vaihe. Se suoritetaan myös testien epäonnistuessa, jotta saat palautteen osapisteistä:
+
+   ```yaml
+   # Arvioi tehtävän suoritus.
+   - name: Autograding
+     if: always()
+     uses: ohjelmistokehitys/autograder@v0
+   ```
 
 Voit valita testaustavan ja -työkalun itse. Esimerkiksi [Robot Framework](https://robotframework.org/), [Vitest](https://vitest.dev/) tai [Bruno CLI](https://docs.usebruno.com/bru-cli/overview) sopivat tehtävään, mutta voit käyttää myös `curl`-komentoja ja Bash-skriptejä. Työkalun on oltava suoritettavissa komentoriviltä automatisoidussa ympäristössä: pelkkä graafinen käyttöliittymä tai VS Code -laajennus ei riitä. Huolehdi myös työkalun tarvitsemasta ajoympäristöstä, kuten Pythonista, ja tallenna riippuvuudet repositorioon toistettavaa asennusta varten.
 
@@ -55,6 +63,7 @@ Saat osan tehtävän pisteistä, kun työnkulku asentaa riippuvuudet ja käynnis
 
 - Työnkulun komennot suoritetaan runnerilla; palvelin ja testit voivat käyttää samaa `http://localhost:3000`-osoitetta. Työvaiheiden oletushakemisto on repositorion juuri, joten huomioi `app`-kansio asennuksessa ja käynnistyksessä.
 - Bashissa `&` käynnistää komennon taustalle. Katso [Bashin ohje taustaprosesseista](https://www.gnu.org/software/bash/manual/html_node/Lists.html) ja [GitHub Actionsin työnkulun syntaksi](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax). Pelkkä taustakäynnistys ei tarkoita, että palvelin on jo valmis.
-- Voit odottaa valmiutta esimerkiksi kokeilemalla `GET /health` -pyyntöä `curl`-komennolla toistuvasti rajatun ajan. Päätepiste ei vaadi tokenia, ja se vastaa `200`, kun palvelin vastaa. Huomaa, että kyseessä on vain esimerkinomainen tarkistus: se ei tarkista sovelluksen tilaa tai riippuvuuksia. Selvitä myös, miten havaitset käynnistysvirheen ja miten näet sovelluksen lokit epäonnistuessa.
+- Voit odottaa valmiutta esimerkiksi kokeilemalla `GET /health` -pyyntöä `curl`-komennolla toistuvasti rajatun ajan ennen testien suorittamista. Tutustu [curlin uudelleenyrityksiin](https://everything.curl.dev/usingcurl/downloads/retry.html): esimerkiksi `--retry`, `--retry-connrefused` ja `--retry-max-time` auttavat odottamaan palvelimen käynnistymistä. Määritä myös yksittäisen pyynnön aikaraja ja varmista, että epäonnistunut tarkistus pysäyttää testivaiheen. Pelkkä kiinteä `sleep` ei varmista, että palvelin on valmis.
+- `/health` ei vaadi tokenia, ja se vastaa `200`, kun palvelin vastaa. Kyseessä on vain esimerkinomainen tarkistus: se ei tarkista sovelluksen tilaa tai riippuvuuksia. Selvitä myös, miten havaitset käynnistysvirheen ja miten näet sovelluksen lokit epäonnistuessa.
 - Sovelluksen README sisältää esimerkkikäyttäjät ja ohjeet tokenin hakemiseen. Hae token testiajon aikana, sillä se vanhenee ja muuttuu sovelluksen käynnistyessä uudelleen.
 - Kun testaat yksittäistä workoutia, käytä luontivastauksen ID:tä. Sovellus käynnistyy tyhjällä tietovarastolla, mutta testit voivat muuttaa sitä saman ajon aikana.
