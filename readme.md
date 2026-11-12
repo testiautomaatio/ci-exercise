@@ -30,6 +30,27 @@ Tehtävän jälkeen osaat:
 
 Voit valita testaustavan ja -työkalun itse. Esimerkiksi [Robot Framework](https://robotframework.org/), [Vitest](https://vitest.dev/) tai [Bruno CLI](https://docs.usebruno.com/bru-cli/overview) sopivat tehtävään, mutta voit käyttää myös `curl`-komentoja ja Bash-skriptejä. Työkalun on oltava suoritettavissa komentoriviltä automatisoidussa ympäristössä: pelkkä graafinen käyttöliittymä tai VS Code -laajennus ei riitä. Huolehdi myös työkalun tarvitsemasta ajoympäristöstä, kuten Pythonista, ja tallenna riippuvuudet repositorioon toistettavaa asennusta varten.
 
+## Testattavat päätepisteet ja tilanteet
+
+Kirjoita testit seuraaville päätepisteille ja tilanteille. Tarkista kussakin tapauksessa HTTP-tilakoodi ja tarvittaessa vastauksen sisältö, ei pelkästään sitä, että pyyntö onnistuu. Tarkemmat vastausmuodot ja esimerkkikäyttäjät löytyvät [sovelluksen README:stä](./app/README.md).
+
+| Päätepiste | Testattavat tilanteet |
+| --- | --- |
+| `GET /` | Ilman kirjautumista palautuu tervetuloviesti ja `200`. |
+| `GET /health` | Ilman kirjautumista palautuu `200` ja vastaus kertoo kyseessä olevan esimerkinomainen tarkistus. |
+| `POST /auth/login` | Oikeilla tunnuksilla palautuu token; väärillä tunnuksilla `401`. Virheellinen JSON sekä puuttuvat tai väärän tyyppiset kentät palauttavat `400`. |
+| `GET /workouts` | Kirjautuneena palautuu lista; varmista, että luotu workout näkyy siinä ja poistettu ei enää näy. |
+| `POST /workouts` | Kelvollisilla tiedoilla palautuu `201`, luotu workout ja sen ID. Virheelliset syötteet palauttavat `400`. |
+| `GET /workouts/:id` | Luotu workout löytyy ID:llä ja sen tiedot ovat oikein. Tuntematon ID palauttaa `404`. |
+| `PUT /workouts/:id` | Kelvollinen päivitys palauttaa `200`, säilyttää ID:n ja muuttaa tiedot myös myöhemmässä haussa. Virheelliset syötteet palauttavat `400`, tuntematon ID `404`. |
+| `DELETE /workouts/:id` | Luodun workoutin poisto palauttaa `204` ja tyhjän vastauksen. Poistettu tai tuntematon ID palauttaa myöhemmin `404`. |
+
+Testaa myös jokaisen suojatun workout-päätepisteen kohdalla, että puuttuva tai virheellinen token palauttaa `401`. Kokeile luonnissa ja päivityksessä esimerkiksi puuttuvia kenttiä, tyhjää nimeä, virheellistä kestoa, ylimääräisiä kenttiä ja virheellistä JSONia. Varmista, ettei epäonnistunut päivitys muuta tallennettuja tietoja.
+
+## Pisteytys
+
+Saat osan tehtävän pisteistä, kun työnkulku asentaa riippuvuudet ja käynnistää sovelluksen onnistuneesti. Loput pisteistä saat omista testeistäsi: niiden tulee kattaa yllä kuvatut tilanteet, tarkistaa tulokset ja toimia GitHub Actionsissa. Voit siis saada osapisteitä, vaikka testisarjasi ei olisi vielä valmis.
+
 ## Vinkkejä
 
 - Työnkulun komennot suoritetaan runnerilla; palvelin ja testit voivat käyttää samaa `http://localhost:3000`-osoitetta. Työvaiheiden oletushakemisto on repositorion juuri, joten huomioi `app`-kansio asennuksessa ja käynnistyksessä.
