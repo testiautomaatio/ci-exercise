@@ -37,7 +37,7 @@ if (new Set(users.map((user) => user.username)).size !== users.length) {
 const app = new Hono();
 const workouts = new Map<string, Workout>();
 const jwtSecret = randomBytes(32).toString('hex');
-const logFile = openSync(new URL('../app.log', import.meta.url), 'a');
+const logFile = openSync(process.env.APP_LOG_PATH ?? new URL('../app.log', import.meta.url), 'a');
 
 function log(message: string) {
   console.log(message);

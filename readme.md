@@ -18,11 +18,33 @@ Tehtävän jälkeen osaat:
 - tulkita työnkulun tuloksia ja havaita testien tai sovelluksen käynnistyksen epäonnistumiset.
 
 > [!TIP]
-> Suosittelemme käyttämään kehitysympäristönä [GitHub Codespacesia](https://docs.github.com/en/codespaces/overview) tai paikallista [devcontaineria](https://code.visualstudio.com/docs/devcontainers/containers). Ne tarjoavat eristetyn ympäristön ja voivat helpottaa riippuvuuksien asentamista. Tässä repositoriossa ei ole valmista devcontainer-konfiguraatiota tai asennusskriptiä: Codespaces voi käyttää oletusympäristöä, ja paikallista devcontaineria varten voit luoda oman konfiguraation. Asenna sovelluksen ja valitsemasi testaustyökalun riippuvuudet käyttämääsi ympäristöön.
+> Suosittelemme käyttämään kehitysympäristönä [GitHub Codespacesia](https://docs.github.com/en/codespaces/overview) tai paikallista [devcontaineria](https://code.visualstudio.com/docs/devcontainers/containers). Linux-pohjainen kehityskontti muistuttaa GitHub Actionsin Linux-runneria ja helpottaa riippuvuuksien asentamista eristettyyn ympäristöön. Tässä repositoriossa ei ole valmista devcontainer-konfiguraatiota tai asennusskriptiä: Codespaces voi käyttää oletusympäristöä, ja paikallista devcontaineria varten voit luoda oman konfiguraation. Asenna sovelluksen ja valitsemasi testaustyökalun riippuvuudet käyttämääsi ympäristöön.
+
+## Sovelluksen asentaminen ja käynnistäminen
+
+Asenna Node.js (vähintään 22.18) ja npm käyttämääsi ympäristöön. Asenna sitten sovelluksen riippuvuudet ja käynnistä se repositorion juuresta:
+
+```bash
+cd app
+npm ci
+npm start
+```
+
+`npm start` kääntää TypeScript-koodin ja käynnistää sovelluksen. Rajapinta on osoitteessa `http://localhost:3000`, ja voit tarkistaa sen vastauksen osoitteesta `http://localhost:3000/health`. Pysäytä sovellus painamalla Ctrl+C. Asenna myös valitsemasi testaustyökalun riippuvuudet sen omien ohjeiden mukaan.
+
+### Vaihtoehto: Docker Compose
+
+Jos käytössäsi on Docker ja Docker Compose, voit sen sijaan rakentaa ja käynnistää sovelluksen repositorion juuresta:
+
+```bash
+docker compose up --build
+```
+
+Rajapinta on samassa `http://localhost:3000`-osoitteessa. Pysäytä sovellus painamalla Ctrl+C ja poista kontti komennolla `docker compose down`. Sovelluksen loki näkyy myös koneellasi tiedostossa `app/app.log`. Compose käynnistää vain sovelluksen: testityökalun riippuvuudet on asennettava erikseen.
 
 ## Tehtävä
 
-1. Tutustu rajapintaan ja käynnistä sovellus paikallisesti. Sovellus tarvitsee Node.js:n (vähintään version 22) ja npm:n.
+1. Tutustu rajapintaan ja käynnistä sovellus paikallisesti. Käytä Node.js:ää (vähintään versiota 22.18) ja npm:ää; automaattinen arviointi edellyttää TypeScript-tukea.
 2. Kirjoita oma automaattinen testisarja, joka lähettää HTTP-pyyntöjä käynnissä olevaan sovellukseen ja tarkistaa vastaukset. Testaa kirjautuminen ja suojattujen pyyntöjen toiminta myös ilman kelvollista tokenia. Testaa vähintään workoutin luonti, listaus, haku, päivitys ja poisto sekä virhetilanteita, kuten virheelliset syötteet ja tuntematon ID. Varmista myös päivityksen ja poiston vaikutus. Suunnittele testit niin, etteivät ne riipu aiempien testiajojen tiedoista.
 3. Luo työnkulku `.github/workflows/`-kansioon. Määrittele sen käynnistymään vähintään push- ja pull request -tapahtumista. Käytä GitHubin ylläpitämiä uudelleenkäytettäviä actioneita repositorion hakemiseen ja Node.js-ympäristön asentamiseen, esimerkiksi [actions/checkout](https://github.com/actions/checkout) ja [actions/setup-node](https://github.com/actions/setup-node).
 4. Asenna työnkulussa sovelluksen riippuvuudet (`npm ci` sovelluskansiossa) sekä valitsemasi testaustyökalun kaikki riippuvuudet. Käynnistä sovellus taustalle samalla runnerilla, jolla testit suoritetaan. Odota, kunnes se vastaa HTTP-pyyntöihin, ennen kuin käynnistät testit; käytä aikarajaa, jotta työnkulku epäonnistuu, jos sovellus ei käynnisty.
