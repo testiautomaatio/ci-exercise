@@ -1,59 +1,133 @@
 {
-    "name": "RPA Challenge (Robotic Process Automation)",
-    "description": "This workflow verifies that your scripts are run correctly and that they cover the required functionality.",
-    "tests": [
-        {
-            "name": "Run tasks and extract traces",
-            "description": "Run the Playwright tests and extract traces for further analysis. Passing this step does not guarantee that your tests covered the required functionality, which is checked by the subsequent checks.",
-            "run": [
-                "npx playwright test --reporter=\"list,html\" --project=chromium --trace=on --retries=0",
-                "./.grading/extract_traces.sh"
-            ],
-            "timeout": "3m",
-            "score": 0,
-            "skipRemainingOnFailure": true
-        },
-        {
-            "name": "Access the legacy cars table",
-            "description": "Checks that your scripts accessed the legacy website and logged in successfully.",
-            "run": "./.grading/find_trace.sh 'Final_CarSheet_v5_(ignore_others).xls'",
-            "timeout": "15s",
-            "score": 10
-        },
-        {
-            "name": "Open details of a car",
-            "description": "Checks that your scripts opened the details of a car.",
-            "run": "./.grading/find_trace.sh 'Stainless Steel'",
-            "timeout": "15s",
-            "score": 10
-        },
-        {
-            "name": "Switch to usage tab on car details",
-            "description": "Checks that your scripts switched to the usage tab on the car details page.",
-            "run": "./.grading/find_trace.sh 'Fuel type'",
-            "timeout": "15s",
-            "score": 10
-        },
-        {
-            "name": "Access the target system",
-            "description": "Checks that your scripts accessed the target system.",
-            "run": "./.grading/find_trace.sh 'Car registry 2.0'",
-            "timeout": "15s",
-            "score": 10
-        },
-        {
-            "name": "Add a single car successfully",
-            "description": "Checks that your scripts added at least a single car successfully.",
-            "run": "./.grading/find_trace.sh 'added successfully!'",
-            "timeout": "15s",
-            "score": 10
-        },
-        {
-            "name": "Add the rest of the cars successfully",
-            "description": "Checks that your scripts added the rest of the cars successfully.",
-            "run": "./.grading/find_trace.sh 'You have completed the exercise!'",
-            "timeout": "15s",
-            "score": 50
-        }
-    ]
+  "name": "Workout API CI exercise",
+  "description": "Checks the application log for startup and HTTP response coverage.",
+  "tests": [
+    {
+      "name": "Application started",
+      "description": "The application logged its listening message.",
+      "score": 20,
+      "run": "grep -Fx -- 'Workout API listening on http://localhost:3000' app/app.log",
+      "skipRemainingOnFailure": true
+    },
+    {
+      "name": "GET /: 200",
+      "description": "The public root endpoint returned 200.",
+      "score": 4,
+      "run": "node .grading/check-log.mts GET / 200"
+    },
+    {
+      "name": "GET /health: 200",
+      "description": "The public health endpoint returned 200.",
+      "score": 4,
+      "run": "node .grading/check-log.mts GET /health 200"
+    },
+    {
+      "name": "POST /auth/login: 200",
+      "description": "A login request returned 200.",
+      "score": 4,
+      "run": "node .grading/check-log.mts POST /auth/login 200"
+    },
+    {
+      "name": "POST /auth/login: 400",
+      "description": "An invalid login request returned 400.",
+      "score": 4,
+      "run": "node .grading/check-log.mts POST /auth/login 400"
+    },
+    {
+      "name": "POST /auth/login: 401",
+      "description": "A login request with invalid credentials returned 401.",
+      "score": 4,
+      "run": "node .grading/check-log.mts POST /auth/login 401"
+    },
+    {
+      "name": "GET /workouts: 200",
+      "description": "A workout list request returned 200.",
+      "score": 4,
+      "run": "node .grading/check-log.mts GET /workouts 200"
+    },
+    {
+      "name": "GET /workouts: 401",
+      "description": "An unauthorized workout list request returned 401.",
+      "score": 4,
+      "run": "node .grading/check-log.mts GET /workouts 401"
+    },
+    {
+      "name": "POST /workouts: 201",
+      "description": "A workout creation request returned 201.",
+      "score": 4,
+      "run": "node .grading/check-log.mts POST /workouts 201"
+    },
+    {
+      "name": "POST /workouts: 400",
+      "description": "An invalid workout creation request returned 400.",
+      "score": 4,
+      "run": "node .grading/check-log.mts POST /workouts 400"
+    },
+    {
+      "name": "POST /workouts: 401",
+      "description": "An unauthorized workout creation request returned 401.",
+      "score": 4,
+      "run": "node .grading/check-log.mts POST /workouts 401"
+    },
+    {
+      "name": "GET /workouts/:id: 200",
+      "description": "A workout lookup returned 200.",
+      "score": 4,
+      "run": "node .grading/check-log.mts GET /workouts/:id 200"
+    },
+    {
+      "name": "GET /workouts/:id: 404",
+      "description": "A workout lookup returned 404.",
+      "score": 4,
+      "run": "node .grading/check-log.mts GET /workouts/:id 404"
+    },
+    {
+      "name": "GET /workouts/:id: 401",
+      "description": "An unauthorized workout lookup returned 401.",
+      "score": 4,
+      "run": "node .grading/check-log.mts GET /workouts/:id 401"
+    },
+    {
+      "name": "PUT /workouts/:id: 200",
+      "description": "A workout update returned 200.",
+      "score": 4,
+      "run": "node .grading/check-log.mts PUT /workouts/:id 200"
+    },
+    {
+      "name": "PUT /workouts/:id: 400",
+      "description": "An invalid workout update returned 400.",
+      "score": 4,
+      "run": "node .grading/check-log.mts PUT /workouts/:id 400"
+    },
+    {
+      "name": "PUT /workouts/:id: 404",
+      "description": "An update of a nonexistent workout returned 404.",
+      "score": 4,
+      "run": "node .grading/check-log.mts PUT /workouts/:id 404"
+    },
+    {
+      "name": "PUT /workouts/:id: 401",
+      "description": "An unauthorized workout update returned 401.",
+      "score": 4,
+      "run": "node .grading/check-log.mts PUT /workouts/:id 401"
+    },
+    {
+      "name": "DELETE /workouts/:id: 204",
+      "description": "A workout deletion returned 204.",
+      "score": 4,
+      "run": "node .grading/check-log.mts DELETE /workouts/:id 204"
+    },
+    {
+      "name": "DELETE /workouts/:id: 404",
+      "description": "Deletion of a nonexistent workout returned 404.",
+      "score": 4,
+      "run": "node .grading/check-log.mts DELETE /workouts/:id 404"
+    },
+    {
+      "name": "DELETE /workouts/:id: 401",
+      "description": "An unauthorized workout deletion returned 401.",
+      "score": 4,
+      "run": "node .grading/check-log.mts DELETE /workouts/:id 401"
+    }
+  ]
 }

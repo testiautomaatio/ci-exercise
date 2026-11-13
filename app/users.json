@@ -1,0 +1,12 @@
+[
+  {
+    "username": "xkcd",
+    "salt": "774d9d9333c7ae7a295d38739b71a8fe",
+    "passwordHash": "b752e23bc2ca7fb4c584f36e83c72ab291d55dbb084f44b958729783dc6a543659bd2cac66cc4c54649c35f503f694ac1ccbb630a6d55b883e81d2618aefa05d"
+  },
+  {
+    "username": "spaceballs",
+    "salt": "426ee7147b946a78ec328de755885142",
+    "passwordHash": "5df3e5c8bcdbbd731834bcbbebea22b90dedd3a6e302691f6a2e4234175c8e855b542a75998fd5c4a8229e5c199f979fc414df377f4788dc9bd5dcdbbe5318a9"
+  }
+]
