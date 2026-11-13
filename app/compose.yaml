@@ -1,9 +1,9 @@
 services:
   app:
-    build: ./app
+    build: ./
     ports:
       - "3000:3000"
     environment:
       APP_LOG_PATH: /logs/app.log
     volumes:
-      - ./app:/logs
+      - ./app.log:/logs/app.log

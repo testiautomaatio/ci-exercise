@@ -1,12 +1,18 @@
-# CI-työnkulku ja rajapinnan testaus
+# CI-työnkulku ja REST-rajapinnan testaus
 
-Tässä tehtävässä toteutat GitHub Actions -työnkulun, joka käynnistää sovelluksen ja suorittaa kirjoittamasi testit sitä vasten. Lähtötilanteessa repositoriossa ei ole valmista työnkulkua tai testisarjaa.
+Tässä tehtävässä toteutat sekä GitHub Actions -työnkulun, että kirjoitat testejä valmiille REST-rajapinnalle. 
 
-Testattava sovellus on [`app`-kansiossa](./app/README.md). Se tarjoaa yksinkertaisen workout-REST-rajapinnan. Lue sovelluksen README:stä käynnistysohjeet, rajapinnan osoitteet ja odotettu toiminta. Sovellus käyttää muistia, joten sen tiedot häviävät, kun prosessi pysäytetään.
+Työnkulkusi tulee käynnistää sovellus ja suorittaa kirjoittamasi testit sitä vasten. Lähtötilanteessa repositoriossa ei ole valmista työnkulkua tai testisarjaa eikä testaustyökalua ole valittu. Sinun tulee valita sopiva työkalu, asentaa sen riippuvuudet, kirjoittaa testit ja automatisoida työnkulku.
+
+Työnkulku suoritetaan GitHub Actionsin Linux-runnerilla, joten varmista, että valitsemasi työkalu toimii siinä. Et voi esimerkiksi käyttää graafisia käyttöliittymiä tai VS Code -laajennoksia testien suorittamiseen. Graafiset työkalut ja laajennokset voivat olla hyödyllisiä testien kirjoittamisessa, mutta testit on suoritettava komentoriviltä.
+
+Testattava sovellus löytyy tästä repositoriosta [`app`-kansiossa](./app/README.md). Se tarjoaa yksinkertaisen REST-rajapinnan treenien (workout) hallintaan. Lue sovelluksen README:stä käynnistysohjeet, rajapinnan osoitteet ja odotettu toiminta.
+
+Sovellus käyttää tietojen tallentamiseen paikallista muistia, joten sen toiminta alkaa nollasta jokaisella käynnistyksellä. Testit voivat muuttaa sovelluksen tilaa ja voit esimerkiksi lisätä, hakea ja poistaa niitä. Treenit eivät kuitenkaan säily eri käynnistysten välillä.
 
 ## Tausta ja oppimistavoitteet
 
-Aiemmissa testaustehtävissä olet ehkä voinut kokeilla sovellusta käsin esimerkiksi painikkeita klikkaamalla. Tällä kertaa testattavalla sovelluksella ei ole käyttöliittymää: se tarjoaa rajapinnan toiselle kehitystiimille, joka voi myöhemmin integroida oman sovelluksensa siihen. Miten voit varmistaa, että rajapinta toimii odotetusti jo ennen kuin tuo käyttöliittymä on olemassa?
+Aiemmissa testaustehtävissä olet ehkä voinut kokeilla sovellusta käsin esimerkiksi painikkeita klikkaamalla. Tällä kertaa testattavalla sovelluksella ei ole käyttöliittymää: se tarjoaa rajapinnan esimerkiksi toiselle kehitystiimille, joka voi myöhemmin integroida oman sovelluksensa siihen. Miten voit varmistaa, että rajapinta toimii odotetusti jo ennen kuin tuo käyttöliittymä on olemassa?
 
 Pääset valitsemaan itse, miten lähestyt ongelmaa! Voit käyttää tuttua testaustyökalua, kokeilla uutta tai rakentaa testit vaikkapa `curl`-komennoilla ja Bash-skripteillä. Olennaista on, että testit tarkistavat tulokset ja että ne voidaan suorittaa automaattisesti GitHub Actionsissa.
 
@@ -14,42 +20,35 @@ Tehtävän jälkeen osaat:
 
 - testata REST-rajapintaa lähettämällä HTTP-pyyntöjä, käyttämällä autentikointia ja tarkistamalla vastauksia ja virhetilanteita
 - valita tehtävään sopivat työkalut ja asentaa niiden riippuvuudet automatisoidussa ympäristössä
-- rakentaa CI-työnkulun, joka käynnistää sovelluksen, odottaa sen valmistumista ja suorittaa testit
+- rakentaa CI-työnkulun, joka käynnistää sovellukse ja suorittaa testit
 - tulkita työnkulun tuloksia ja havaita testien tai sovelluksen käynnistyksen epäonnistumiset.
 
 > [!TIP]
-> Suosittelemme käyttämään kehitysympäristönä [GitHub Codespacesia](https://docs.github.com/en/codespaces/overview) tai paikallista [devcontaineria](https://code.visualstudio.com/docs/devcontainers/containers). Linux-pohjainen kehityskontti muistuttaa GitHub Actionsin Linux-runneria ja helpottaa riippuvuuksien asentamista eristettyyn ympäristöön. Tässä repositoriossa ei ole valmista devcontainer-konfiguraatiota tai asennusskriptiä: Codespaces voi käyttää oletusympäristöä, ja paikallista devcontaineria varten voit luoda oman konfiguraation. Asenna sovelluksen ja valitsemasi testaustyökalun riippuvuudet käyttämääsi ympäristöön.
+> Suosittelemme käyttämään kehitysympäristönä [GitHub Codespacesia](https://docs.github.com/en/codespaces/overview) tai paikallista [devcontaineria](https://code.visualstudio.com/docs/devcontainers/containers).
+>
+> Linux-pohjainen kehityskontti muistuttaa GitHub Actionsin Linux-runneria ja helpottaa riippuvuuksien asentamista eristettyyn ympäristöön.
 
 ## Sovelluksen asentaminen ja käynnistäminen
 
-Asenna Node.js (vähintään 22.18) ja npm käyttämääsi ympäristöön. Asenna sitten sovelluksen riippuvuudet ja käynnistä se repositorion juuresta:
+App-hakemistossa sijaitseva testattava sovellus on toteutettu Node.js:llä ja TypeScriptillä käyttäen Hono-frameworkia.
 
-```bash
-cd app
-npm ci
-npm start
-```
+Sinun ei tarvitse tutustua eikä muokata sovelluksen lähdekoodiin, mutta voit halutessasi tehdä niin. Oleellista on, että saat sovelluksen käynnistettyä ja voit lähettää siihen HTTP-pyyntöjä. Sovellus voidaan käynnistää joko suoraan Node.js:llä tai Dockerilla. Valintasi mukaan siis asenna joko Node.js tai Docker.
 
-`npm start` kääntää TypeScript-koodin ja käynnistää sovelluksen. Rajapinta on osoitteessa `http://localhost:3000`, ja voit tarkistaa sen vastauksen osoitteesta `http://localhost:3000/health`. Pysäytä sovellus painamalla Ctrl+C. Asenna myös valitsemasi testaustyökalun riippuvuudet sen omien ohjeiden mukaan.
+Asennus- ja käynnistysohjeet löytyvät [sovelluksen README:stä](./app/README.md). Lue se huolellisesti, sillä siinä on myös tietoa rajapinnan osoitteista, odotetuista vastauksista ja virhetilanteista. Sovelluksessa on myös käyttäjätunnukset ja salasanat, jotka löytyvät readme-tiedostosta.
 
-### Vaihtoehto: Docker Compose
+> [!TIP]
+> GitHub actionsin Linux-runnerilla ja GitHubin Codespacesilla on valmiiksi asennettuna sekä Node.js että Docker, joten molemmat vaihtoehdot ovat hyviä.
 
-Jos käytössäsi on Docker ja Docker Compose, voit sen sijaan rakentaa ja käynnistää sovelluksen repositorion juuresta:
-
-```bash
-docker compose up --build
-```
-
-Rajapinta on samassa `http://localhost:3000`-osoitteessa. Pysäytä sovellus painamalla Ctrl+C ja poista kontti komennolla `docker compose down`. Sovelluksen loki näkyy myös koneellasi tiedostossa `app/app.log`. Compose käynnistää vain sovelluksen: testityökalun riippuvuudet on asennettava erikseen.
 
 ## Tehtävä
 
-1. Tutustu rajapintaan ja käynnistä sovellus paikallisesti. Käytä Node.js:ää (vähintään versiota 22.18) ja npm:ää; automaattinen arviointi edellyttää TypeScript-tukea.
-2. Kirjoita oma automaattinen testisarja, joka lähettää HTTP-pyyntöjä käynnissä olevaan sovellukseen ja tarkistaa vastaukset. Testaa kirjautuminen ja suojattujen pyyntöjen toiminta myös ilman kelvollista tokenia. Testaa vähintään workoutin luonti, listaus, haku, päivitys ja poisto sekä virhetilanteita, kuten virheelliset syötteet ja tuntematon ID. Varmista myös päivityksen ja poiston vaikutus. Suunnittele testit niin, etteivät ne riipu aiempien testiajojen tiedoista.
-3. Luo työnkulku `.github/workflows/`-kansioon. Määrittele sen käynnistymään vähintään push- ja pull request -tapahtumista. Käytä GitHubin ylläpitämiä uudelleenkäytettäviä actioneita repositorion hakemiseen ja Node.js-ympäristön asentamiseen, esimerkiksi [actions/checkout](https://github.com/actions/checkout) ja [actions/setup-node](https://github.com/actions/setup-node).
-4. Asenna työnkulussa sovelluksen riippuvuudet (`npm ci` sovelluskansiossa) sekä valitsemasi testaustyökalun kaikki riippuvuudet. Käynnistä sovellus taustalle samalla runnerilla, jolla testit suoritetaan. Odota, kunnes se vastaa HTTP-pyyntöihin, ennen kuin käynnistät testit; käytä aikarajaa, jotta työnkulku epäonnistuu, jos sovellus ei käynnisty.
-5. Suorita testisarjasi työnkulussa käynnissä olevaa sovellusta vasten. Varmista, että epäonnistunut testi tai käynnistysvirhe saa työnkulun epäonnistumaan. Lähetä testit, työnkulku ja mahdolliset riippuvuuksien määritykset GitHubiin ja tarkista suoritus repositorion Actions-välilehdeltä.
-6. Lisää työnkulkuusi testien jälkeen samaan jobiin seuraava vaihe. Se suoritetaan myös testien epäonnistuessa, jotta saat palautteen osapisteistä:
+1. Tutustu rajapintaan ja käynnistä sovellus paikallisesti tai Docker-kontissa.
+2. Kirjoita oma automaattinen testisarja, joka lähettää HTTP-pyyntöjä käynnissä olevaan sovellukseen ja tarkistaa vastaukset. Testaa kirjautuminen ja suojattujen pyyntöjen toiminta myös ilman kelvollista tokenia. 
+3. Testaa vähintään workoutin luonti, listaus, haku, päivitys ja poisto sekä virhetilanteita, kuten virheelliset syötteet ja tuntematon ID. Varmista myös päivityksen ja poiston vaikutus. Suunnittele testit niin, etteivät ne riipu aiempien testiajojen tiedoista.
+4. Luo työnkulku `.github/workflows/`-kansioon. Määrittele sen käynnistymään vähintään push- ja pull request -tapahtumista. Käytä GitHubin ylläpitämiä uudelleenkäytettäviä actioneita repositorion hakemiseen ja Node.js-ympäristön asentamiseen, esimerkiksi [actions/checkout](https://github.com/actions/checkout) ja [actions/setup-node](https://github.com/actions/setup-node).
+5. Asenna työnkulussa sovelluksen riippuvuudet tai hyödynnä Docker compose -tiedosto. Asenna myös valitsemasi testaustyökalun kaikki riippuvuudet. Käynnistä sovellus taustalle samalla runnerilla, jolla testit suoritetaan. Odota, kunnes se vastaa HTTP-pyyntöihin, ennen kuin käynnistät testit; käytä aikarajaa, jotta työnkulku epäonnistuu, jos sovellus ei käynnisty.
+6. Suorita testisarjasi työnkulussa käynnissä olevaa sovellusta vasten. Varmista, että epäonnistunut testi tai käynnistysvirhe saa työnkulun epäonnistumaan. Lähetä testit, työnkulku ja mahdolliset riippuvuuksien määritykset GitHubiin ja tarkista suoritus repositorion Actions-välilehdeltä.
+7. Lisää työnkulkuusi testien jälkeen samaan jobiin seuraava vaihe. Se suoritetaan myös testien epäonnistuessa, jotta saat palautteen osapisteistä:
 
    ```yaml
    # Arvioi tehtävän suoritus.
@@ -79,7 +78,9 @@ Testaa myös jokaisen suojatun workout-päätepisteen kohdalla, että puuttuva t
 
 ## Pisteytys
 
-Saat osan tehtävän pisteistä, kun työnkulku asentaa riippuvuudet ja käynnistää sovelluksen onnistuneesti. Loput pisteistä saat omista testeistäsi: niiden tulee kattaa yllä kuvatut tilanteet, tarkistaa tulokset ja toimia GitHub Actionsissa. Voit siis saada osapisteitä, vaikka testisarjasi ei olisi vielä valmis.
+Saat osan tehtävän pisteistä, kun työnkulku asentaa riippuvuudet ja käynnistää sovelluksen onnistuneesti.
+
+Loput pisteistä saat omista testeistäsi: niiden tulee kattaa yllä kuvatut tilanteet, tarkistaa tulokset ja toimia GitHub Actionsissa. Voit siis saada osapisteitä, vaikka testisarjasi ei olisi vielä valmis.
 
 ## Vinkkejä
 
