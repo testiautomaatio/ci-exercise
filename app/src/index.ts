@@ -4,15 +4,17 @@ import { readFile } from 'node:fs/promises';
 import { stripVTControlCharacters } from 'node:util';
 import { serve } from '@hono/node-server';
 import { Hono, type Context } from 'hono';
-import { jwt, sign } from 'hono/jwt';
+import { jwt, sign, type JwtVariables } from 'hono/jwt';
 import { logger } from 'hono/logger';
+
+type AppEnv = { Variables: JwtVariables };
 
 type WorkoutInput = {
   name: string;
   durationMinutes: number;
 };
 
-type Workout = WorkoutInput & { id: string };
+type Workout = WorkoutInput & { id: string; username: string };
 
 type User = {
   username: string;
@@ -34,7 +36,7 @@ if (new Set(users.map((user) => user.username)).size !== users.length) {
   throw new Error('Duplicate usernames in users.json');
 }
 
-const app = new Hono();
+const app = new Hono<AppEnv>();
 const workouts = new Map<string, Workout>();
 const jwtSecret = randomBytes(32).toString('hex');
 const logFile = openSync(process.env.APP_LOG_PATH ?? new URL('../app.log', import.meta.url), 'a');
@@ -93,6 +95,14 @@ app.post('/auth/login', async (c) => {
 
 app.use('*', jwt({ secret: jwtSecret, alg: 'HS256' }));
 
+function authenticatedUsername(c: Context<AppEnv>): string {
+  const username = c.get('jwtPayload').sub;
+  if (typeof username !== 'string') {
+    throw new Error('Authenticated JWT is missing a subject');
+  }
+  return username;
+}
+
 async function readWorkout(c: Context): Promise<WorkoutInput | null> {
   let body: unknown;
   try {
@@ -118,38 +128,48 @@ async function readWorkout(c: Context): Promise<WorkoutInput | null> {
   return { name: body.name.trim(), durationMinutes: body.durationMinutes };
 }
 
-app.get('/workouts', (c) => c.json([...workouts.values()]));
+app.get('/workouts', (c) => {
+  const username = authenticatedUsername(c);
+  return c.json([...workouts.values()].filter((workout) => workout.username === username));
+});
 
 app.get('/workouts/:id', (c) => {
   const workout = workouts.get(c.req.param('id'));
-  return workout ? c.json(workout) : c.json({ error: 'Workout not found' }, 404);
+  return workout?.username === authenticatedUsername(c)
+    ? c.json(workout)
+    : c.json({ error: 'Workout not found' }, 404);
 });
 
 app.post('/workouts', async (c) => {
   const data = await readWorkout(c);
   if (!data) return c.json({ error: 'Invalid workout' }, 400);
 
-  const workout = { id: randomUUID(), ...data };
+  const workout = { id: randomUUID(), username: authenticatedUsername(c), ...data };
   workouts.set(workout.id, workout);
   return c.json(workout, 201);
 });
 
 app.put('/workouts/:id', async (c) => {
   const id = c.req.param('id');
-  if (!workouts.has(id)) return c.json({ error: 'Workout not found' }, 404);
+  const existingWorkout = workouts.get(id);
+  if (existingWorkout?.username !== authenticatedUsername(c)) {
+    return c.json({ error: 'Workout not found' }, 404);
+  }
 
   const data = await readWorkout(c);
   if (!data) return c.json({ error: 'Invalid workout' }, 400);
 
-  const workout = { id, ...data };
+  const workout = { ...existingWorkout, ...data };
   workouts.set(id, workout);
   return c.json(workout);
 });
 
 app.delete('/workouts/:id', (c) => {
-  if (!workouts.delete(c.req.param('id'))) {
+  const id = c.req.param('id');
+  if (workouts.get(id)?.username !== authenticatedUsername(c)) {
     return c.json({ error: 'Workout not found' }, 404);
   }
+  workouts.delete(id);
   return c.body(null, 204);
 });
 
