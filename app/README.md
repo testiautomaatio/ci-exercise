@@ -168,4 +168,4 @@ sequenceDiagram
 
 ## Logging
 
-Hono's request logger writes request methods, URLs, response status codes and timings to stdout and appends them to `app/app.log`. The file persists across restarts and is ignored by Git. The app must have permission to write to the `app` directory. `APP_LOG_PATH` can override the file location; Docker Compose uses it to write to the mounted directory. URLs include query strings, so do not put passwords or tokens in them.
+Hono's request logger writes request methods, URLs, response status codes and timings to stdout and appends them to `app/logs/app.log`. The file persists across restarts and is ignored by Git. The app must have permission to write to the `app` directory. `APP_LOG_PATH` can override the file location; Docker Compose uses it to write to the mounted directory. URLs include query strings, so do not put passwords or tokens in them.
