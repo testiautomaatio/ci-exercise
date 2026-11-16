@@ -118,21 +118,7 @@ Lisää workflow:hun vaihe, joka odottaa, kunnes sovellus vastaa HTTP-pyyntöihi
 
 Varsinaisten testien suunnittelun ja suorittamisen osalta voit valita itse sopivan tavan ja työkalun. Testien tulee kuitenkin olla automatisoitavissa komentoriviltä, jotta voit automatisoida ne GitHub actionsissa. Testaustyökalun valinnassa kannattaa miettiä omia mieltymyksiä ja oppimistavoitteita sekä eri testaustyökalujen ominaisuuksia.
 
-**JS/TS-pohjaiset testit**
-
-Aikaisemmin käyttämistämme testaustyökaluista esimerkiksi Playwright ei välttämättä ole tällä kertaa suositeltava  valinta, sillä se on tarkoitettu pääasiassa selainpohjaisten käyttöliittymien testaamiseen, ja tällä kertaa testaamme REST-rajapintaa. Sen sijaan [Vitest](https://vitest.dev/) tukee Playwrightin kaltaisia testejä, joissa testit voidaan kirjoittaa JavaScriptillä tai TypeScriptillä, HTTP-pyynnöt tehdä [`fetch`-funktiolla](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/fetch) ja vastaukset tarkistaa esimerkiksi [`expect`-funktiolla](https://vitest.dev/api/expect.html).
-
-**REST/HTTP-pohjaiset testit**
-
-Vitestin avulla on mahdollista testata liki mitä tahansa, mutta joissain tapauksissa saatat haluta mieluummin juuri REST-rajapintojen testaamiseen tarkoitettuja työkaluja.[Robot Frameworkin laajennoksista](https://robotframework.org/#resources) löytyykin juuri HTTP-pyyntöjen tekemiseen tarkoitettuja kirjastoja, joiden avulla voit kirjoittaa testisi Robot-syntaksia ja -komentoja käyttäen. Toisaalta Robot Frameworkin syntaksi esimerkiksi JSON-olioiden käsittelyssä voi vaatia hieman totuttelua, jos olet tottunut kirjoittamaan perinteisillä ohjelmointikielillä.
-
-Lisäksi monet muut avoimen lähdekoodin työkalut, kuten [Bruno](https://www.usebruno.com/), tukevat HTTP-pyyntöjen tekemistä ja vastausten tarkistamista. Brunon vahvuuksiin kuuluvat mm. suoraviivainen komentorivikäyttö sekä paikallisesti että GitHub actionsissa.
-
-**GitHub actions -työnkulut, laajennokset ja pilvipalvelut**
-
-Eri työkaluihin tutustuessasi saatat törmätä erilaisiin kaupallisiin sekä avoimen lähdekoodin GitHub actions -työnkulkuihin, laajennoksiin ja pilvipalveluihin, jotka tarjoavat erilaisia ratkaisuja testien suorittamiseen.
-
-Suhtaudu tarjontaan kriittisesti ja pyri valitsemaan sellainen työkalu, joka ei edellytä tarpeettomia asennuksia, kirjautumisia tai muita toimenpiteitä. Ideaalitapauksessa valitsemasi työkalu suorittaa testit samalla tavalla sekä paikallisesti että GitHub actionsissa.
+Voit hyödyntää työkalun valinnassa tässä repositoriossa löytyvää [tools.md-tiedostoa](./tools.md), jossa on listattu joitain vaihtoehtoisia lähestymistapoja sekä avoimen lähdekoodin työkaluja, joita voit käyttää. Tiedosto sisältää myös linkkejä työkalujen dokumentaatioihin ja ohjeisiin.
 
 ### 4. Testien toteuttaminen ja suorittaminen: perustapaukset (10 * 3 %)
 
