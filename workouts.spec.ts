@@ -30,6 +30,11 @@ test.describe('endpoints requiring authentication', () => {
         tokens.spaceballs = (await login('spaceballs', passwords.spaceballs))[1].token;
     });
 
+    test('GET without valid token returns 401', async () => {
+        const response1 = await fetch(BASE + '/workouts');
+        expect(response1.status).toBe(401);
+    });
+
     test('POST /workouts creates a workout for the authenticated user', async () => {
         const [status, workout] = await post('/workouts', tokens.xkcd, { name: 'Morning run', durationMinutes: 30 });
         expect(status).toBe(201);
@@ -78,6 +83,24 @@ test.describe('endpoints requiring authentication', () => {
         const [status] = await get(`/workouts/nonexistent`, tokens.xkcd);
         expect(status).toBe(404);
     });
+
+    test('All methods for a single workout', async () => {
+        const [ok, workout] = await post('/workouts', tokens.xkcd, { name: 'XKCD', durationMinutes: 30 });
+        expect(ok).toBe(201);
+
+        const [getStatus, getWorkout] = await get(`/workouts/${workout.id}`, tokens.xkcd);
+        expect(getStatus).toBe(200);
+        expect(getWorkout).toEqual(workout);
+
+        const [updateStatus, updatedWorkout] = await put(`/workouts/${workout.id}`, tokens.xkcd, { name: 'Updated', durationMinutes: 45 });
+        expect(updateStatus).toBe(200);
+        expect(updatedWorkout.name).toBe('Updated');
+        expect(updatedWorkout.durationMinutes).toBe(45);
+
+        const [deleteStatus, deletedData] = await del(`/workouts/${workout.id}`, tokens.xkcd);
+        expect(deleteStatus).toBe(204);
+        expect(deletedData).toEqual("");
+    });
 });
 
 
@@ -113,4 +136,29 @@ async function post(path: string, token: string, body: any): Promise<[number, an
     });
 
     return [response.status, await response.json()];
+}
+
+async function put(path: string, token: string, body: any): Promise<[number, any]> {
+    const response = await fetch(BASE + path, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    return [response.status, await response.json()];
+}
+
+async function del(path: string, token: string): Promise<[number, string]> {
+    const response = await fetch(BASE + path, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    });
+
+    return [response.status, await response.text()];
 }
