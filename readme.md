@@ -49,15 +49,15 @@ Tehtävä on jaettu eri vaiheisiin, joista saa osapisteitä. Suosittelemme etene
 
 ### 1. GitHub actions -workflow:n luonti ja autograder (20 %)
 
-GitHubin automaattiset CI-työnkulut eli actionsit määritellään YAML-tiedostoina repositorion `.github/workflows/`-hakemistossa. Tiedostoon määritellään kaikki työnkulkuun liittyvät vaiheet ja asetukset ja ne voidaan määritellä esimerkiksi käynnistymään push- ja pull request -tapahtumista.
+GitHubin automaattiset CI-työnkulut eli actionsit määritellään YAML-tiedostoina repositorion `.github/workflows/`-hakemistossa. Tiedostoon määritellään kaikki työnkulkuun liittyvät vaiheet ja asetukset. Tehtävässä ei ole valmiina tarvittuja hakemistoja eikä yhtään workflow:ta, joten luo hakemistot ja tiedosto itse. Workflow-tiedoston nimellä ei ole merkitystä, kunhan se noudattaa [GitHubin vaatimuksia](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax).
 
-Aloita tutustumalla [GitHub actionsin dokumentaatioon](https://docs.github.com/en/actions). Suosittelemme tekemään ensin [quick start -dokumentin mukaisen workflown](https://docs.github.com/en/actions/get-started/quickstart) ja tarkistamaan, että saat sen toimimaan. Sen jälkeen voit muokata sitä sovelluksen käynnistämiseen ja testien suorittamiseen sopivaksi. Workflow-tiedoston nimellä ei ole merkitystä, ja voit asettaa sen käynnistymään esimerkiksi `push`- ja `workflow_dispatch`-tapahtumista. Tärkeintä on, että workflow tulee suoritetuksi samalla, kun etenet tehtävässä.
+Aloita tutustumalla [GitHub actionsin dokumentaatioon](https://docs.github.com/en/actions). Suosittelemme tekemään ensin [quick start -dokumentin mukaisen workflown](https://docs.github.com/en/actions/get-started/quickstart) ja tarkistamaan, että saat sen toimimaan. Sen jälkeen voit muokata sitä sovelluksen käynnistämiseen ja testien suorittamiseen sopivaksi. Workflow-tiedoston nimellä ei ole merkitystä ja voit asettaa sen käynnistymään [esimerkiksi `push`- ja `workflow_dispatch`-tapahtumista](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#push). Käytä [GitHubin Linux-pohjaista runneria](https://docs.github.com/en/actions/reference/runners/github-hosted-runners), esimerkiksi `ubuntu-latest`, joka sisältää valmiiksi useita vaadittuja työkaluja.
 
 **Automaattinen arviointi**
 
-Kun olet saanut workflow:n toimimaan, lisää siihen automaattiseen arviointiin vaadittavat kohdat.
+Kun olet saanut workflow:n ajettua onnistuneesti, lisää siihen automaattiseen arviointiin vaadittavat kohdat.
 
-Aloita määrittelemällä alkuun, käynnistymisehtojen jälkeen käyttöoikeudet, jotka sallivat workflow:n lukea repositorion sisällön ja kirjoittaa status-tietoihin saamasi pisteet:
+Aloita määrittelemällä tiedoston alkuun käyttöoikeudet, jotka sallivat workflow:n lukea repositorion sisällön ja kirjoittaa commitin statukseen tehtävästä saamasi pisteet:
 
 ```diff
 + permissions:
@@ -68,6 +68,14 @@ Aloita määrittelemällä alkuun, käynnistymisehtojen jälkeen käyttöoikeude
 Lisää työnkululle timeout, joka estää työnkulkua jäämästä jumiin, jos se kestää liian kauan. Lisää myös loppuun step, joka käynnistää automaattisen arvioinnin:
 
 ```diff
+  # ...
+
++ permissions:
++   contents: read
++   statuses: write
+
+  # ...
+
   jobs:
     name_of_your_job:
       runs-on: ubuntu-latest
@@ -94,13 +102,13 @@ Testattava sovellus tulee käynnistää GitHub actionsissa, jotta testit voivat 
 
 **Suorittaminen taustalla**
 
-Huomaa, että sovellus tulee käynnistää *taustalle*, jotta GitHub actions voi jatkaa seuraaviin vaiheisiin. Docker compose käynnistää palvelut taustalle automaattisesti jos käytät `-d`- tai `--detach`-vaihtoehtoa. Node.js:llä voit käyttää Bashin `&`-merkkiä, joka käynnistää komennon taustalle.
+Huomaa, että sovellus tulee käynnistää *taustalle*, jotta GitHub actions voi jatkaa seuraaviin vaiheisiin ja suorittaa testit. Docker compose käynnistää palvelut taustalle automaattisesti jos käytät `-d`- tai `--detach`-vaihtoehtoa. Node.js:llä voit käyttää Bashin `&`-merkkiä, joka käynnistää komennon taustalle. Etsi tarpeen mukaan lisätietoa ja kokeile ratkaisuasi komentorivillä ennen sen lisäämistä workflow:hun.
 
 **Käynnistymisen odottaminen**
 
-Pelkkä taustakäynnistys ei kuitenkaan tarkoita, että sovellus on jo valmis vastaamaan HTTP-pyyntöihin. Palvelimelle kestääkin hetken, ennen kuin se on valmis ja testit voivat alkaa.
+Pelkkä taustakäynnistys ei tarkoita, että sovellus olisi heti valmis vastaamaan HTTP-pyyntöihin. Palvelimelle kestääkin hetken, ennen kuin se on valmis ja testit voidaan aloittaa.
 
-Lisää siis workflow:hun vaihe, joka odottaa, kunnes sovellus vastaa HTTP-pyyntöihin. Voit esimerkiksi [tarkistaa toistuvasti `GET /health` -päätepistettä rajatun ajan](https://everything.curl.dev/usingcurl/downloads/retry.html), kunnes saat vastauksen. Määritä myös [aikaraja](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepstimeout-minutes), jotta workflow epäonnistuu, jos sovellus ei vastaa esimerkiksi yhden minuutin kuluessa.
+Lisää workflow:hun vaihe, joka odottaa, kunnes sovellus vastaa HTTP-pyyntöihin. Voit esimerkiksi [tarkistaa curl-komennolla toistuvasti `GET /health` -päätepistettä rajatun ajan](https://everything.curl.dev/usingcurl/downloads/retry.html), kunnes saat vastauksen. Määritä myös workflow:hun [aikaraja](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepstimeout-minutes), jotta workflow ei jää tarpeettomasti ajoon, jos sovellus ei vastaa esimerkiksi yhden minuutin kuluessa.
 
 ### 3. Valitse testaustyökalu
 
@@ -143,6 +151,22 @@ Kun saat nämä testit toimimaan GitHub actionsissa, kannattaa siirtyä testaama
 
 ### 5. Testien kirjoittaminen suorittaminen: virhetilanteet (10 * 3 %)
 
-Onnistuneiden pyyntöjen lisäksi testien tulee tarkistaa myös virhetilanteet. Testaa esimerkiksi puuttuvia kenttiä, tyhjää nimeä, virheellistä kestoa ja virheellistä JSONia. Varmista, ettei epäonnistunut päivitys muuta tallennettuja tietoja.
+Onnistuneiden pyyntöjen lisäksi testien tulee tarkistaa myös virhetilanteita. Testaa esimerkiksi eri pyyntöjen yhteydessä puuttuvia kenttiä, tyhjää nimeä, virheellistä kestoa ja virheellistä JSONia. Varmista, ettei epäonnistunut päivitys muuta tallennettuja tietoja.
 
-Jotta voit varmistaa, että käyttäjät eivät voi nähdä, muokata tai poistaa toistensa treenejä, kannattaa testeissä käyttää molempia esimerkkikäyttäjiä. Voit luoda molemmille käyttäjille kirjautumistokenit ja testata, että toisella tokenilla luotu treeni ei ole toisen käyttäjän saatavilla.
+Tarkista lisäksi, että autentikointia vaativat päätepisteet palauttavat `401 Unauthorized`, jos pyyntö lähetetään esimerkiksi ilman tokenia.
+
+Käytä testeissäsi molempia käyttäjätunnuksia, jotta voit varmistaa, että käyttäjät eivät voi nähdä, muokata tai poistaa toistensa tietoja. Voit luoda molemmille käyttäjille kirjautumistokenit ja testata, että toisella tokenilla luotu treeni ei ole toisen käyttäjän luettavissa, muokattavissa tai poistettavissa.
+
+## Tehtävän lähettäminen ja arviointi
+
+Lähetä ratkaisusi GitHubiin ja varmista, että workflow suoritetaan onnistuneesti. Tarkista, että testien suorittaminen onnistuu ja tutki automaattisen arvioinnin tulokset.
+
+On hyvin mahdollista, että testisi menevät läpi ja että et saa aivan kaikkia pisteitä. Tässä tilanteessa kannattaa tarkistaa autograding-raportista ne testitapaukset, joista pisteitä ei tullut, ja tutkia onko niissä tilanteita, joita et ole huomioinut testeissäsi.
+
+Voit lähettää ratkaisusi GitHubiin useita kertoja tehtävän määräaikaan asti. Varmista kuitenkin, että viimeisin suoritus tuottaa parhaan tuloksen.
+
+## Materiaalista
+
+Tämän tehtävän on kehittänyt Teemu Havulinna ja se on lisensoitu [Creative Commons BY-NC-SA -lisenssillä](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+Tehtävän luonnissa on hyödynnetty kielimalleja ja tekoälytyökaluja, kuten GitHub Copilot.

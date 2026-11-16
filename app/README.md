@@ -121,14 +121,14 @@ Requests to an individual workout return `404` and an error message if the ID do
 >
 > The following example creates a workout named "Morning run" with a duration of 30 minutes for the user represented by the token. `<JWT>` needs to be replaced with the token received from `POST /auth/login`.
 >
-> This example uses `curl` and should work on Unix-like systems, like a codespace or a development container.
->
 > ```bash
 > curl -i -X POST http://localhost:3000/workouts \
 >   -H 'Authorization: Bearer <JWT>' \
 >   -H 'Content-Type: application/json' \
 >   -d '{"name":"Morning run","durationMinutes":30}'
 > ```
+>
+> This example uses `curl` and should work on Unix-like systems, like a codespace or a development container. You will need to modify the command if you are using Powershell or Windows Command Prompt.
 
 ## Sequence diagram
 
