@@ -18,8 +18,14 @@ jobs:
       - name: Start the REST API
         run: docker compose -f app/compose.yaml up --detach
 
-      - name: Wait for the REST API to be ready
-        run: curl --retry 10 --retry-delay 5 --retry-all-errors http://localhost:3000/health
+#      - name: Wait for the REST API to be ready
+#        run: curl --retry 10 --retry-delay 5 --retry-all-errors http://localhost:3000/health
+
+      - name: install app dependencies
+        run: npm --prefix app install
+
+      - name: run the app tests
+        run: npm --prefix app start &
 
       - name: Install dependencies
         run: npm install
