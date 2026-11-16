@@ -134,7 +134,7 @@ Eri työkaluihin tutustuessasi saatat törmätä erilaisiin kaupallisiin sekä a
 
 Suhtaudu tarjontaan kriittisesti ja pyri valitsemaan sellainen työkalu, joka ei edellytä tarpeettomia asennuksia, kirjautumisia tai muita toimenpiteitä. Ideaalitapauksessa valitsemasi työkalu suorittaa testit samalla tavalla sekä paikallisesti että GitHub actionsissa.
 
-### 4. Testien kirjoittaminen suorittaminen: perustapaukset (10 * 3 %)
+### 4. Testien toteuttaminen ja suorittaminen: perustapaukset (10 * 3 %)
 
 Kirjoita testit, jotka tarkistavat sovelluksen rajapinnan toimintaa eri tilanteissa. Testien tulee tarkistaa HTTP-tilakoodit ja tarvittaessa myös vastauksen sisältö. Testit tulee pystyä suorittamaan GitHub actionsissa.
 
@@ -183,7 +183,7 @@ Hyödynnä edellä käsiteltyjä HTTP-metodeja ja -tilakoodeja testien kirjoitta
 | `PUT /workouts/:id` | Kelvollinen päivitys palauttaa `200`. Virheelliset syötteet palauttavat `400`, tuntematon ID tai eri käyttäjän datan muokkausyritys palauttavat `404`. |
 | `DELETE /workouts/:id` | Luodun workoutin poisto palauttaa `204` ja tyhjän vastauksen. Tuntematon ID tai eri käyttäjän datan poistoyritys palauttaa `404`. |
 
-### 5. Testien kirjoittaminen suorittaminen: negatiiviset testitapaukset (10 * 3 %)
+### 5. Testien toteuttaminen ja suorittaminen: negatiiviset testitapaukset (10 * 3 %)
 
 Onnistuneiden pyyntöjen lisäksi testien tulee tarkistaa myös virhetilanteita. Testaa esimerkiksi, että puuttuvat tai väärän tyyppiset kentät eivät aiheuta odottamattomia virheitä. Varmista, etteivät epäonnistuneet päivitykset muuta tallennettuja tietoja.
 
