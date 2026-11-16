@@ -1,33 +1,46 @@
 # Workout API
 
-A minimal TypeScript and Hono REST API for workouts. The data is stored in memory: it starts empty and is lost when the process stops.
+A minimal [TypeScript](https://www.typescriptlang.org/) and [Hono](https://hono.dev/) REST API for workouts.
 
-## Run locally
+The data is stored in memory: it starts empty and is lost when the process stops.
 
-Install Node.js 22 or newer and npm, then run:
+## Running the API
+
+The backend server for the Workout API can be run either directly with Node.js or inside a Docker container. The instructions below assume that you are in the repository root.
+
+Running the Docker container is the recommended approach, but you can also run the server directly with Node.js if you prefer.
+
+> [!TIP]
+> GitHub Actions Linux runners and GitHub Codespaces have both Node.js and Docker preinstalled, so either option works equally well for this exercise.
+
+
+### Run with Docker Compose
+
+If you have Docker installed, you can run the server with Docker Compose. From the repository root, run:
+
+```bash
+docker compose -f app/compose.yaml up
+```
+
+If you use Docker, you will not need Node.js or npm installed locally. The Docker container will install the dependencies and start the server within the container.
+
+If you want, you can check the [Dockerfile](./Dockerfile) and [compose.yaml](./compose.yaml) to see how the container is built and run.
+
+The API listens at `http://localhost:3000`. `GET /health` can be used for checking that the server is responding properly. Stop it with Ctrl+C, then you can remove the container with `docker compose -f app/compose.yaml down`.
+
+The app reports at startup whether `GITHUB_ACTIONS` is `true`. GitHub Actions sets this variable on the runner, and Compose passes it into the container (defaulting to `false` when unset). This is an environment indicator, not proof that the app is running in GitHub Actions.
+
+### Run with local Node.js
+
+Install a maintained version of Node.js and then run:
 
 ```bash
 cd app
-npm ci
+npm install
 npm start
 ```
 
-`npm start` compiles the TypeScript source into `dist/` before starting the server; `npm run build` can also be used to compile separately.
-
 The API listens at `http://localhost:3000`. Stop it with Ctrl+C. `GET /health` can be used for checking that the server is responding properly.
-
-> [!TIP]
-> ## Run with Docker Compose
-> 
-> Alternatively, install Docker and Docker Compose, then run from the repository root:
-> 
-> ```bash
-> docker compose up --build
-> ```
-> 
-> If you use Docker, you will not need Node.js or npm installed locally, nor will you need to run `npm ci` or `npm start`. The container runs the same commands as above, but the app is compiled and started inside the container.
->
-> The API is available at `http://localhost:3000`. Stop it with Ctrl+C, then remove the container with `docker compose down`.
 
 ## Public endpoints
 
@@ -63,19 +76,21 @@ The server signs tokens with a secret key, which is generated on each startup, s
 
 Send `POST /auth/login` with a JSON object containing `username` and `password`. Valid credentials return `200` and `{"token":"<JWT>"}`. Invalid credentials return `401` and an error message; malformed JSON or missing or non-string fields return `400` and an error message.
 
-For example:
-
-```bash
-curl -sS http://localhost:3000/auth/login \
-  -H 'Content-Type: application/json' \
-  -d '{"username":"xkcd","password":"correct horse battery staple"}'
-```
+> For example, you can run the following command to log in as `xkcd` and receive a token. The server will respond with a JSON object containing the token, which you can then use in subsequent requests.
+>
+> ```bash
+> curl -X POST http://localhost:3000/auth/login \
+>   -H 'Content-Type: application/json' \
+>   -d '{"username":"xkcd","password":"correct horse battery staple"}'
+> ```
+>
+> The above command works on Unix-like systems like GitHub actions, codespaces or development containers. On Windows, you will need to modify the command.
 
 ### Using a token
 
-Include the received token in an `Authorization: Bearer <JWT>` header on all requests other than `GET /`, `GET /health` and `POST /auth/login`. Missing, invalid or expired tokens return `401`. 
+Include the received token in an `Authorization: Bearer <JWT>` header on all requests other than `GET /`, `GET /health` and `POST /auth/login`. Missing, invalid or expired tokens return `401`.
 
-Tokens expire after one hour; restarting the app invalidates them, so log in again.
+Tokens expire after one hour. Restarting the REST api also invalidates them.
 
 ## Workout
 
@@ -107,7 +122,7 @@ Requests to an individual workout return `404` and an error message if the ID do
 > The following example creates a workout named "Morning run" with a duration of 30 minutes for the user represented by the token. `<JWT>` needs to be replaced with the token received from `POST /auth/login`.
 >
 > This example uses `curl` and should work on Unix-like systems, like a codespace or a development container.
-> 
+>
 > ```bash
 > curl -i -X POST http://localhost:3000/workouts \
 >   -H 'Authorization: Bearer <JWT>' \
