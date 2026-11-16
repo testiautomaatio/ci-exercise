@@ -144,6 +144,32 @@ Suosittelemme, että testaat esimerkiksi ensin palvelimen juuressa olevan päät
 
 Kun saat nämä testit toimimaan GitHub actionsissa, kannattaa siirtyä testaamaan autentikointia vaativia päätepisteitä. Toteuta testin alussa kirjautuminen, ja käytä saamaasi tokenia seuraavissa kutsuissa. Autentikointia ja tokenia koskevat ohjeet löytyvät [sovelluksen README:stä](./app/README.md).
 
+#### HTTP-metodit
+
+Tehtävässä tarvitset seuraavia HTTP-metodeja. Voit lukea lisää HTTP-metodeista esimerkiksi [MDN:n dokumentaatiosta](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods).
+
+| Metodi | Käyttötarkoitus tässä tehtävässä |
+| --- | --- |
+| `GET` | Hae tietoja, kuten harjoituksia tai health-checkin tulos. |
+| `POST` | Kirjaudu sisään tai luo uusi harjoitus. |
+| `PUT` | Päivitä harjoituksen tiedot. Pyyntö korvaa harjoituksen muokattavat tiedot. |
+| `DELETE` | Poista harjoitus. |
+
+#### HTTP-vastausten tilakoodit
+
+Palvelimen vastatessa pyyntöön se palauttaa HTTP-tilakoodin, joka kertoo, onnistuiko pyyntö vai ei. Eri sarjat kertovat, onko pyyntö onnistunut, epäonnistunut vai onko palvelimella ongelmia. Esimerkiksi 2xx-tilakoodit kertovat, että pyyntö onnistui. 3xx-tilakoodit kertovat, että pyyntö onnistui, mutta vaatii lisätoimia, esimerkiksi uudelleenohjauksen. 4xx-tilakoodit kertovat, että pyyntö ei onnistunut, koska asiakas teki virheen. 5xx-tilakoodit kertovat, että palvelimella on tapahtunut virhe.
+
+Tässä tehtävässä tarvitset lähinnä 2xx- ja 4xx-tilakoodeja, jotka on koostettu alla olevaan taulukkoon. Voit lukea lisää HTTP-tilakoodeista esimerkiksi [MDN:n dokumentaatiosta](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status).
+
+| Tilakoodi | Merkitys tässä tehtävässä |
+| --- | --- |
+| `200 OK` | Pyyntö onnistui, esimerkiksi tietojen haussa, kirjautumisessa tai päivityksessä. |
+| `201 Created` | Harjoituksen luonti onnistui. |
+| `204 No Content` | Harjoituksen poisto onnistui, eikä vastauksessa ole sisältöä. |
+| `400 Bad Request` | Pyynnön JSON tai kenttien arvot ovat virheelliset. |
+| `401 Unauthorized` | Kirjautuminen epäonnistui tai suojattuun päätepisteeseen ei toimitettu kelvollista tokenia. |
+| `404 Not Found` | Harjoitusta ei löydy tai se kuuluu toiselle käyttäjälle. |
+
 | Päätepiste | Testattavat tilanteet |
 | --- | --- |
 | `GET /` | Tervetuloviesti JSON-muodossa ja `200`. |
