@@ -30,6 +30,16 @@ test.describe('endpoints requiring authentication', () => {
         tokens.spaceballs = (await login('spaceballs', passwords.spaceballs))[1].token;
     });
 
+    test('authentication with invalid credentials returns 401', async () => {
+        const [status1] = await login('xkcd', 'wrong password');
+        expect(status1).toBe(401);
+    });
+
+    test('authentication with unknown user returns 401', async () => {
+        const [status1] = await login('unknown', 'wrong password');
+        expect(status1).toBe(401);
+    });
+
     test('GET without valid token returns 401', async () => {
         const response1 = await fetch(BASE + '/workouts');
         expect(response1.status).toBe(401);
@@ -44,6 +54,11 @@ test.describe('endpoints requiring authentication', () => {
             name: 'Morning run',
             durationMinutes: 30
         });
+    });
+
+    test('POST /workouts returns 401 for invalid tokens', async () => {
+        const [status1] = await post('/workouts', "invalid-token", { name: '', durationMinutes: 30 });
+        expect(status1).toBe(401);
     });
 
     test('POST /workouts returns 400 for invalid workout data', async () => {
@@ -101,6 +116,28 @@ test.describe('endpoints requiring authentication', () => {
         expect(deleteStatus).toBe(204);
         expect(deletedData).toEqual("");
     });
+
+    test('PUT /workouts/:id returns 404 for a workout that does not belong to the authenticated user', async () => {
+        const [, workout] = await post('/workouts', tokens.xkcd, { name: 'XKCD', durationMinutes: 30 });
+
+        const [status1] = await put(`/workouts/${workout.id}`, tokens.spaceballs, { name: 'Updated', durationMinutes: 45 });
+        expect(status1).toBe(404);
+
+        const [status2] = await put(`/workouts/notfound`, tokens.spaceballs, { name: 'Updated', durationMinutes: 45 });
+        expect(status2).toBe(404);
+    });
+
+    test('DELETE /workouts/:id returns 404 for a workout that does not belong to the authenticated user', async () => {
+        const [, workout] = await post('/workouts', tokens.xkcd, { name: 'XKCD', durationMinutes: 30 });
+
+        const [status1] = await del(`/workouts/${workout.id}`, tokens.spaceballs);
+        expect(status1).toBe(404);
+
+        const [status2] = await del(`/workouts/notfound`, tokens.spaceballs);
+        expect(status2).toBe(404);
+    });
+
+
 });
 
 
@@ -135,7 +172,7 @@ async function post(path: string, token: string, body: any): Promise<[number, an
         body: JSON.stringify(body)
     });
 
-    return [response.status, await response.json()];
+    return [response.status, await response.json().catch((err) => err)];
 }
 
 async function put(path: string, token: string, body: any): Promise<[number, any]> {
