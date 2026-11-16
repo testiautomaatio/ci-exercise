@@ -3,131 +3,124 @@
   "description": "Checks the application log for startup and HTTP response coverage.",
   "tests": [
     {
-      "name": "Application started",
-      "description": "The application logged its listening message.",
-      "score": 20,
-      "run": "grep -Fx -- 'Workout API listening on http://localhost:3000' app/app.log",
-      "skipRemainingOnFailure": true
+      "name": "1. Basic: GET / returns 200",
+      "description": "Public endpoint returns welcome message",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> GET / 200'"
     },
     {
-      "name": "GET /: 200",
-      "description": "The public root endpoint returned 200.",
-      "score": 4,
-      "run": "node .grading/check-log.mts GET / 200"
+      "name": "2. Basic: GET /health returns 200",
+      "description": "Health check endpoint works without authentication",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> GET /health 200'"
     },
     {
-      "name": "GET /health: 200",
-      "description": "The public health endpoint returned 200.",
-      "score": 4,
-      "run": "node .grading/check-log.mts GET /health 200"
+      "name": "3. Basic: POST /auth/login returns 200",
+      "description": "Valid login with correct credentials returns token",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> POST /auth/login 200'"
     },
     {
-      "name": "POST /auth/login: 200",
-      "description": "A login request returned 200.",
-      "score": 4,
-      "run": "node .grading/check-log.mts POST /auth/login 200"
+      "name": "4. Basic: GET /workouts returns 200",
+      "description": "Authenticated user can list their workouts",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> GET /workouts 200'"
     },
     {
-      "name": "POST /auth/login: 400",
-      "description": "An invalid login request returned 400.",
-      "score": 4,
-      "run": "node .grading/check-log.mts POST /auth/login 400"
+      "name": "5. Basic: POST /workouts returns 201",
+      "description": "Creating a workout returns 201 Created with new ID",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> POST /workouts 201'"
     },
     {
-      "name": "POST /auth/login: 401",
-      "description": "A login request with invalid credentials returned 401.",
-      "score": 4,
-      "run": "node .grading/check-log.mts POST /auth/login 401"
+      "name": "6. Basic: GET /workouts/{id} returns 200",
+      "description": "Retrieving a specific workout by ID works",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> GET /workouts/[^ ]* 200' true"
     },
     {
-      "name": "GET /workouts: 200",
-      "description": "A workout list request returned 200.",
-      "score": 4,
-      "run": "node .grading/check-log.mts GET /workouts 200"
+      "name": "7. Basic: PUT /workouts/{id} returns 200",
+      "description": "Updating a workout preserves ID and returns updated data",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> PUT /workouts/[^ ]* 200' true"
     },
     {
-      "name": "GET /workouts: 401",
-      "description": "An unauthorized workout list request returned 401.",
-      "score": 4,
-      "run": "node .grading/check-log.mts GET /workouts 401"
+      "name": "8. Basic: DELETE /workouts/{id} returns 204",
+      "description": "Deleting a workout returns 204 No Content",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> DELETE /workouts/[^ ]* 204' true"
     },
     {
-      "name": "POST /workouts: 201",
-      "description": "A workout creation request returned 201.",
-      "score": 4,
-      "run": "node .grading/check-log.mts POST /workouts 201"
+      "name": "9. Basic: Multiple users can authenticate",
+      "description": "Second user (spaceballs) can log in separately",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> POST /auth/login 200' && bash .grading/check-log.sh '--> POST /auth/login 200'"
     },
     {
-      "name": "POST /workouts: 400",
-      "description": "An invalid workout creation request returned 400.",
-      "score": 4,
-      "run": "node .grading/check-log.mts POST /workouts 400"
+      "name": "10. Basic: Empty workout list for new user",
+      "description": "Newly authenticated user initially sees empty workout list",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> GET /workouts 200'"
     },
     {
-      "name": "POST /workouts: 401",
-      "description": "An unauthorized workout creation request returned 401.",
-      "score": 4,
-      "run": "node .grading/check-log.mts POST /workouts 401"
+      "name": "11. Error: POST /auth/login with wrong password returns 401",
+      "description": "Invalid credentials are rejected",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> POST /auth/login 401'"
     },
     {
-      "name": "GET /workouts/:id: 200",
-      "description": "A workout lookup returned 200.",
-      "score": 4,
-      "run": "node .grading/check-log.mts GET /workouts/:id 200"
+      "name": "12. Error: POST /auth/login with missing field returns 400",
+      "description": "Malformed request (missing password field) returns 400",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> POST /auth/login 400'"
     },
     {
-      "name": "GET /workouts/:id: 404",
-      "description": "A workout lookup returned 404.",
-      "score": 4,
-      "run": "node .grading/check-log.mts GET /workouts/:id 404"
+      "name": "13. Error: GET /workouts without token returns 401",
+      "description": "Protected endpoint requires authentication",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> GET /workouts 401'"
     },
     {
-      "name": "GET /workouts/:id: 401",
-      "description": "An unauthorized workout lookup returned 401.",
-      "score": 4,
-      "run": "node .grading/check-log.mts GET /workouts/:id 401"
+      "name": "14. Error: POST /workouts with invalid token returns 401",
+      "description": "Invalid/malformed token is rejected",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> POST /workouts 401'"
     },
     {
-      "name": "PUT /workouts/:id: 200",
-      "description": "A workout update returned 200.",
-      "score": 4,
-      "run": "node .grading/check-log.mts PUT /workouts/:id 200"
+      "name": "15. Error: POST /workouts with empty name returns 400",
+      "description": "Validation: empty workout name is rejected",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> POST /workouts 400'"
     },
     {
-      "name": "PUT /workouts/:id: 400",
-      "description": "An invalid workout update returned 400.",
-      "score": 4,
-      "run": "node .grading/check-log.mts PUT /workouts/:id 400"
+      "name": "16. Error: POST /workouts with invalid duration returns 400",
+      "description": "Validation: negative or invalid duration is rejected",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> POST /workouts 400'"
     },
     {
-      "name": "PUT /workouts/:id: 404",
-      "description": "An update of a nonexistent workout returned 404.",
-      "score": 4,
-      "run": "node .grading/check-log.mts PUT /workouts/:id 404"
+      "name": "17. Error: GET /workouts/{nonexistent} returns 404",
+      "description": "Querying non-existent workout ID returns 404 Not Found",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> GET /workouts/[^ ]* 404' true"
     },
     {
-      "name": "PUT /workouts/:id: 401",
-      "description": "An unauthorized workout update returned 401.",
-      "score": 4,
-      "run": "node .grading/check-log.mts PUT /workouts/:id 401"
+      "name": "18. Error: PUT /workouts/{nonexistent} returns 404",
+      "description": "Updating non-existent workout returns 404 Not Found",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> PUT /workouts/[^ ]* 404' true"
     },
     {
-      "name": "DELETE /workouts/:id: 204",
-      "description": "A workout deletion returned 204.",
-      "score": 4,
-      "run": "node .grading/check-log.mts DELETE /workouts/:id 204"
+      "name": "19. Error: DELETE /workouts/{nonexistent} returns 404",
+      "description": "Deleting non-existent workout returns 404 Not Found",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> DELETE /workouts/[^ ]* 404' true"
     },
     {
-      "name": "DELETE /workouts/:id: 404",
-      "description": "Deletion of a nonexistent workout returned 404.",
-      "score": 4,
-      "run": "node .grading/check-log.mts DELETE /workouts/:id 404"
-    },
-    {
-      "name": "DELETE /workouts/:id: 401",
-      "description": "An unauthorized workout deletion returned 401.",
-      "score": 4,
-      "run": "node .grading/check-log.mts DELETE /workouts/:id 401"
+      "name": "20. Error: Cross-user permission violation returns 404",
+      "description": "User cannot access/modify another user's workout (returns 404)",
+      "score": 3,
+      "run": "bash .grading/check-log.sh '--> PUT /workouts/[^ ]* 404' true"
     }
   ]
 }
