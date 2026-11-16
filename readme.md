@@ -157,7 +157,7 @@ Tehtävässä tarvitset seuraavia HTTP-metodeja. Voit lukea lisää HTTP-metodei
 
 #### HTTP-vastausten tilakoodit
 
-Palvelimen vastatessa pyyntöön se palauttaa HTTP-tilakoodin, joka kertoo, onnistuiko pyyntö vai ei. Eri sarjat kertovat, onko pyyntö onnistunut, epäonnistunut vai onko palvelimella ongelmia. Esimerkiksi 2xx-tilakoodit kertovat, että pyyntö onnistui. 3xx-tilakoodit kertovat, että pyyntö onnistui, mutta vaatii lisätoimia, esimerkiksi uudelleenohjauksen. 4xx-tilakoodit kertovat, että pyyntö ei onnistunut, koska asiakas teki virheen. 5xx-tilakoodit kertovat, että palvelimella on tapahtunut virhe.
+HTTP-palvelimen vastatessa pyyntöön se palauttaa HTTP-tilakoodin, joka kertoo, onnistuiko pyyntö vai ei. Eri sarjat kertovat, onko pyyntö onnistunut, epäonnistunut vai onko palvelimella ongelmia. Esimerkiksi 2xx-tilakoodit kertovat, että pyyntö onnistui. 3xx-tilakoodit kertovat, että pyyntö onnistui, mutta vaatii lisätoimia, esimerkiksi uudelleenohjauksen. 4xx-tilakoodit kertovat, että pyyntö ei onnistunut, koska asiakas teki virheen. 5xx-tilakoodit kertovat, että palvelimella on tapahtunut virhe.
 
 Tässä tehtävässä tarvitset lähinnä 2xx- ja 4xx-tilakoodeja, jotka on koostettu alla olevaan taulukkoon. Voit lukea lisää HTTP-tilakoodeista esimerkiksi [MDN:n dokumentaatiosta](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status).
 
@@ -170,6 +170,8 @@ Tässä tehtävässä tarvitset lähinnä 2xx- ja 4xx-tilakoodeja, jotka on koos
 | `401 Unauthorized` | Kirjautuminen epäonnistui tai suojattuun päätepisteeseen ei toimitettu kelvollista tokenia. |
 | `404 Not Found` | Harjoitusta ei löydy tai se kuuluu toiselle käyttäjälle. |
 
+Hyödynnä edellä käsiteltyjä HTTP-metodeja ja -tilakoodeja testien kirjoittamisessa. Alla on esitetty taulukko, joka sisältää testattavat päätepisteet ja tilanteet.
+
 | Päätepiste | Testattavat tilanteet |
 | --- | --- |
 | `GET /` | Tervetuloviesti JSON-muodossa ja `200`. |
@@ -181,11 +183,11 @@ Tässä tehtävässä tarvitset lähinnä 2xx- ja 4xx-tilakoodeja, jotka on koos
 | `PUT /workouts/:id` | Kelvollinen päivitys palauttaa `200`. Virheelliset syötteet palauttavat `400`, tuntematon ID tai eri käyttäjän datan muokkausyritys palauttavat `404`. |
 | `DELETE /workouts/:id` | Luodun workoutin poisto palauttaa `204` ja tyhjän vastauksen. Tuntematon ID tai eri käyttäjän datan poistoyritys palauttaa `404`. |
 
-### 5. Testien kirjoittaminen suorittaminen: negatiiviset tapaukset (10 * 3 %)
+### 5. Testien kirjoittaminen suorittaminen: negatiiviset testitapaukset (10 * 3 %)
 
-Onnistuneiden pyyntöjen lisäksi testien tulee tarkistaa myös virhetilanteita. Testaa esimerkiksi eri pyyntöjen yhteydessä puuttuvia kenttiä, tyhjää nimeä, virheellistä kestoa ja virheellistä JSON:ia. Varmista, ettei epäonnistunut päivitys muuta tallennettuja tietoja.
+Onnistuneiden pyyntöjen lisäksi testien tulee tarkistaa myös virhetilanteita. Testaa esimerkiksi, että puuttuvat tai väärän tyyppiset kentät eivät aiheuta odottamattomia virheitä. Varmista, etteivät epäonnistuneet päivitykset muuta tallennettuja tietoja.
 
-Tarkista lisäksi, että autentikointia vaativat päätepisteet palauttavat `401 Unauthorized`, jos pyyntö lähetetään esimerkiksi ilman tokenia.
+Tarkista lisäksi, että autentikointia vaativat päätepisteet palauttavat `401 Unauthorized`, jos pyyntö lähetetään esimerkiksi ilman vaadittua autentikointitokenia.
 
 Käytä testeissäsi [molempia käyttäjätunnuksia](./app/README.md), jotta voit varmistaa, että käyttäjät eivät voi nähdä, muokata tai poistaa toistensa tietoja. Voit luoda molemmille käyttäjille kirjautumistokenit ja testata, että toisella tokenilla luotu data ei ole toisen käyttäjän luettavissa, muokattavissa tai poistettavissa.
 

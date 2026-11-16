@@ -1,6 +1,6 @@
 {
-  "name": "Workout API CI exercise",
-  "description": "Checks the application log for startup and HTTP response coverage.",
+  "name": "Testing the workout API in a GitHub Actions workflow",
+  "description": "This autograding suite inspects your GitHub actions workflow. It checks that the application is started in the background and that the REST API is reachable. It also checks that your tests are executed and that they cover both positive and negative test cases.",
   "tests": [
     {
       "name": "Workflow is defined successfully",
@@ -28,49 +28,49 @@
       "skipRemainingOnFailure": true
     },
     {
-      "name": "Positive test: GET / returns 200",
+      "name": "Positive test: GET / welcomes visitors",
       "description": "Public endpoint returns welcome message",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> GET / 200'"
     },
     {
-      "name": "Positive test: GET /health returns 200",
+      "name": "Positive test: GET /health confirms service health",
       "description": "Health check endpoint works without authentication",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> GET /health 200'"
     },
     {
-      "name": "Positive test: POST /auth/login returns 200",
+      "name": "Positive test: POST /auth/login grants a token",
       "description": "Valid login with correct credentials returns token",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> POST /auth/login 200'"
     },
     {
-      "name": "Positive test: GET /workouts returns 200",
+      "name": "Positive test: GET /workouts lists workouts",
       "description": "Authenticated user can list their workouts",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> GET /workouts 200'"
     },
     {
-      "name": "Positive test: POST /workouts returns 201",
+      "name": "Positive test: POST /workouts creates a workout",
       "description": "Creating a workout returns 201 Created with new ID",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> POST /workouts 201'"
     },
     {
-      "name": "Positive test: GET /workouts/{id} returns 200",
+      "name": "Positive test: GET /workouts/{id} shows a workout",
       "description": "Retrieving a specific workout by ID works",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> GET /workouts/[^ ]* 200' true"
     },
     {
-      "name": "Positive test: PUT /workouts/{id} returns 200",
+      "name": "Positive test: PUT /workouts/{id} updates a workout",
       "description": "Updating a workout preserves ID and returns updated data",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> PUT /workouts/[^ ]* 200' true"
     },
     {
-      "name": "Positive test: DELETE /workouts/{id} returns 204",
+      "name": "Positive test: DELETE /workouts/{id} deletes a workout",
       "description": "Deleting a workout returns 204 No Content",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> DELETE /workouts/[^ ]* 204' true"
@@ -91,61 +91,61 @@
       "run": "bash .grading/check-log.sh '--> GET /workouts 200'"
     },
     {
-      "name": "Negative test: POST /auth/login with wrong password returns 401",
+      "name": "Negative test: POST /auth/login rejects wrong passwords",
       "description": "Invalid credentials are rejected",
       "score": 3,
       "run": "bash .grading/check-log.sh 'Wrong password attempt'"
     },
     {
-      "name": "Negative test: POST /auth/login with unknown user returns 401",
+      "name": "Negative test: POST /auth/login rejects unknown users",
       "description": "Non-existent user is rejected",
       "score": 3,
       "run": "bash .grading/check-log.sh 'Failed login attempt for non-existent user'"
     },
     {
-      "name": "Negative test: GET /workouts without token returns 401",
+      "name": "Negative test: GET /workouts requires a token",
       "description": "Protected endpoint requires authentication",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> GET /workouts 401'"
     },
     {
-      "name": "Negative test: POST /workouts with invalid token returns 401",
+      "name": "Negative test: POST /workouts rejects invalid or missing tokens",
       "description": "Invalid/malformed token is rejected",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> POST /workouts 401'"
     },
     {
-      "name": "Negative test: POST /workouts with incorrect data returns 400",
+      "name": "Negative test: POST /workouts rejects invalid data",
       "description": "The request payload must be valid and contain required fields",
       "score": 3,
       "run": "bash .grading/check-log.sh '--> POST /workouts 400'"
     },
     {
-      "name": "Negative test: GET /workouts/{nonexistent} returns 404",
+      "name": "Negative test: GET /workouts/{id} hides missing workouts",
       "description": "Querying non-existent workout ID returns 404 Not Found",
       "score": 3,
       "run": "bash .grading/check-log.sh 'Workout not found'"
     },
     {
-      "name": "Negative test: GET /workouts/{otherUsersWorkoutId} returns 404",
-      "description": "Querying a workout ID that belongs to another user returns 404 Not Found",
+      "name": "Negative test: GET /workouts/{id} hides others' workouts",
+      "description": "Querying a workout ID that belongs to another user returns 404 Not Found. In this test, you can use the second user to create a workout and then try to access it with the first user's token.",
       "score": 3,
       "run": "bash .grading/check-log.sh 'User tried to access a workout owned by another user'"
     },
     {
-      "name": "Negative test: PUT /workouts/{nonexistent} returns 404",
-      "description": "Updating non-existent workout returns 404 Not Found",
+      "name": "Negative test: PUT /workouts/{id} rejects missing workouts",
+      "description": "Updating workout with a non-existent or removed ID returns 404 Not Found",
       "score": 3,
       "run": "bash .grading/check-log.sh 'Workout not found for update'"
     },
     {
-      "name": "Negative test: DELETE /workouts/{nonexistent} returns 404",
+      "name": "Negative test: DELETE /workouts/{id} rejects missing workouts",
       "description": "Deleting non-existent workout returns 404 Not Found",
       "score": 3,
       "run": "bash .grading/check-log.sh 'Workout not found for deletion'"
     },
     {
-      "name": "Negative test: DELETE /workouts/{otherUsersWorkoutId} returns 404",
+      "name": "Negative test: DELETE /workouts/{id} hides others' workouts",
       "description": "User cannot delete another user's workout (returns 404)",
       "score": 3,
       "run": "bash .grading/check-log.sh 'User attempted to delete workout owned by another user'"
