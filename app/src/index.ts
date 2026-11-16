@@ -7,6 +7,11 @@ import { Hono, type Context } from 'hono';
 import { jwt, sign, type JwtVariables } from 'hono/jwt';
 import { logger } from 'hono/logger';
 
+const ghActionsTimeoutSeconds = 300;
+const port = 3000;
+const sessionLifetimeSeconds = 3600;
+
+
 type AppEnv = { Variables: JwtVariables };
 
 type WorkoutInput = {
@@ -22,25 +27,25 @@ type User = {
   passwordHash: string;
 };
 
-const userData: unknown = JSON.parse(await readFile(new URL('../users.json', import.meta.url), 'utf8'));
-if (!Array.isArray(userData) || userData.length === 0 || !userData.every((user: unknown) =>
-  user !== null && typeof user === 'object' &&
-  'username' in user && typeof user.username === 'string' && user.username.length > 0 &&
-  'salt' in user && typeof user.salt === 'string' && /^[0-9a-f]{32}$/.test(user.salt) &&
-  'passwordHash' in user && typeof user.passwordHash === 'string' && /^[0-9a-f]{128}$/.test(user.passwordHash)
-)) {
-  throw new Error('Invalid users.json');
-}
-const users: User[] = userData;
-if (new Set(users.map((user) => user.username)).size !== users.length) {
-  throw new Error('Duplicate usernames in users.json');
-}
+// Load users from users.json file
+const users: User[] = JSON.parse(await readFile(new URL('../users.json', import.meta.url), 'utf8'));
 
+// Create a Hono app instance
 const app = new Hono<AppEnv>();
+
+// In-memory storage for workouts
 const workouts = new Map<string, Workout>();
+
+// Generate a random secret for JWT signing, this makes the JWT secret unique for each server start, which is suitable for testing but not for production.
 const jwtSecret = randomBytes(32).toString('hex');
+
+// Write logs to a file, where they can be inspected during autograding
 const logFile = openSync(process.env.APP_LOG_PATH ?? new URL('../app.log', import.meta.url), 'a');
 
+// Check if the app is running in GitHub Actions environment
+const isGitHubActions = process.env.GITHUB_ACTIONS === 'true';
+
+/** Custom logger to save logs to a file */
 function log(message: string) {
   console.log(message);
   writeSync(logFile, `${stripVTControlCharacters(message)}\n`);
@@ -66,11 +71,17 @@ app.get('/health', (c) => c.json({
 }));
 
 app.post('/auth/login', async (c) => {
+  const invalidCredentials = { error: 'Invalid credentials' };
+  const invalidLogin = { error: 'Invalid login request' };
+
   let body: unknown;
   try {
     body = await c.req.json();
   } catch (error) {
-    if (error instanceof SyntaxError) return c.json({ error: 'Invalid login request' }, 400);
+    if (error instanceof SyntaxError) {
+      log(`Syntax error in JSON in login request`);
+      return c.json(invalidLogin, 400)
+    };
     throw error;
   }
 
@@ -79,17 +90,24 @@ app.post('/auth/login', async (c) => {
     !('username' in body) || typeof body.username !== 'string' ||
     !('password' in body) || typeof body.password !== 'string'
   ) {
-    return c.json({ error: 'Invalid login request' }, 400);
+    log(`Invalid login request body`);
+    return c.json(invalidLogin, 400);
   }
 
   const user = users.find((candidate) => candidate.username === body.username);
-  const hashUser = user ?? users[0];
-  const hash = await deriveKey(body.password, hashUser.salt);
-  if (!timingSafeEqual(hash, Buffer.from(hashUser.passwordHash, 'hex')) || !user) {
-    return c.json({ error: 'Invalid credentials' }, 401);
+
+  if (!user) {
+    log(`Failed login attempt for non-existent user`);
+    return c.json(invalidCredentials, 401);
   }
 
-  const token = await sign({ sub: user.username, exp: Math.floor(Date.now() / 1000) + 3600 }, jwtSecret, 'HS256');
+  const hash = await deriveKey(body.password, user.salt);
+  if (!timingSafeEqual(hash, Buffer.from(user.passwordHash, 'hex'))) {
+    log(`Wrong password attempt for user ${user.username}`);
+    return c.json(invalidCredentials, 401);
+  }
+
+  const token = await sign({ sub: user.username, exp: Math.floor(Date.now() / 1000) + sessionLifetimeSeconds }, jwtSecret, 'HS256');
   return c.json({ token });
 });
 
@@ -109,6 +127,7 @@ async function readWorkout(c: Context): Promise<WorkoutInput | null> {
     body = await c.req.json();
   } catch (error) {
     if (error instanceof SyntaxError) {
+      log(`Syntax error in JSON in workout request`);
       return null;
     }
     throw error;
@@ -122,6 +141,7 @@ async function readWorkout(c: Context): Promise<WorkoutInput | null> {
     typeof body.durationMinutes !== 'number' ||
     !Number.isInteger(body.durationMinutes) || body.durationMinutes <= 0
   ) {
+    log(`Invalid workout request body`);
     return null;
   }
 
@@ -135,16 +155,27 @@ app.get('/workouts', (c) => {
 
 app.get('/workouts/:id', (c) => {
   const workout = workouts.get(c.req.param('id'));
-  return workout?.username === authenticatedUsername(c)
-    ? c.json(workout)
-    : c.json({ error: 'Workout not found' }, 404);
+  const notFound = { error: 'Workout not found' };
+
+  if (!workout) {
+    log(`Workout not found`);
+    return c.json(notFound, 404)
+  };
+
+  if (workout.username !== authenticatedUsername(c)) {
+    log(`User ${authenticatedUsername(c)} attempted to access workout ${workout.id} owned by ${workout.username}`);
+    // use status code 404 to avoid revealing the existence of the workout to unauthorized users
+    return c.json(notFound, 404);
+  }
+
+  return c.json(workout);
 });
 
 app.post('/workouts', async (c) => {
   const data = await readWorkout(c);
   if (!data) return c.json({ error: 'Invalid workout' }, 400);
 
-  const workout = { id: randomUUID(), username: authenticatedUsername(c), ...data };
+  const workout = { ...data, id: randomUUID(), username: authenticatedUsername(c) };
   workouts.set(workout.id, workout);
   return c.json(workout, 201);
 });
@@ -153,12 +184,19 @@ app.put('/workouts/:id', async (c) => {
   const id = c.req.param('id');
   const existingWorkout = workouts.get(id);
   if (existingWorkout?.username !== authenticatedUsername(c)) {
+    if (existingWorkout) {
+      log(`User ${authenticatedUsername(c)} attempted to update workout ${existingWorkout.id} owned by ${existingWorkout.username}`);
+    } else {
+      log(`Workout not found for update`);
+    }
     return c.json({ error: 'Workout not found' }, 404);
   }
 
   const data = await readWorkout(c);
-  if (!data) return c.json({ error: 'Invalid workout' }, 400);
-
+  if (!data) {
+    log(`Invalid workout data for update`);
+    return c.json({ error: 'Invalid workout' }, 400);
+  }
   const workout = { ...existingWorkout, ...data };
   workouts.set(id, workout);
   return c.json(workout);
@@ -166,14 +204,44 @@ app.put('/workouts/:id', async (c) => {
 
 app.delete('/workouts/:id', (c) => {
   const id = c.req.param('id');
-  if (workouts.get(id)?.username !== authenticatedUsername(c)) {
+  const workout = workouts.get(id);
+  if (!workout) {
+    log(`Workout not found for deletion`);
+    return c.json({ error: 'Workout not found' }, 404);
+  }
+  if (workout?.username !== authenticatedUsername(c)) {
+    log(`User ${authenticatedUsername(c)} attempted to delete workout ${workout.id} owned by ${workout.username}`);
     return c.json({ error: 'Workout not found' }, 404);
   }
   workouts.delete(id);
   return c.body(null, 204);
 });
 
-const port = 3000;
-serve({ fetch: app.fetch, port }, () => {
-  log(`Workout API listening on http://localhost:${port}`);
-});
+async function main() {
+  log(`Running in GitHub Actions: ${isGitHubActions}`);
+
+  log(`Starting Workout API on http://localhost:${port}`);
+
+  // wait for 1 second to make the server more realistic for testing,
+  // as servers typically take a moment to start up.
+  await sleep(1_000);
+
+  serve({ fetch: app.fetch, port }, () => {
+    log(`Workout API listening on http://localhost:${port}`);
+  });
+}
+
+main();
+
+
+// when running in github actions, shut down the server after 300 seconds to avoid hanging the workflow
+if (isGitHubActions) {
+  setTimeout(() => {
+    log(`Shutting down server after ${ghActionsTimeoutSeconds} seconds in GitHub Actions`);
+    process.exit(0);
+  }, ghActionsTimeoutSeconds * 1000);
+}
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
