@@ -48,6 +48,9 @@ npm start
 
 The API listens at `http://localhost:3000`. Stop it with Ctrl+C. `GET /health` can be used for checking that the server is responding properly.
 
+> [!TIP]
+> When you are running the commands in the repository root, but the app is in the `app` subdirectory, you can use `npm --prefix app install` and `npm --prefix app start` to run npm commands in the `app` directory. This way, you don't need to navigate to the `app` directory, which could be inconvenient in the CI workflow.
+
 ## Public endpoints
 
 These endpoints do not require authentication:
@@ -57,7 +60,7 @@ These endpoints do not require authentication:
 | GET | `/` | `200` and welcome message in JSON format |
 | GET | `/health` | `200` and `{"status":"ok"}` with other dummy fields |
 
-The health check is a dummy: it always returns the same response and does not check dependencies or application state. It only demonstrates that the server is responding.
+The health check is a dummy: it always returns the same response and does not check dependencies or application state. It only demonstrates that the server is responding and can be used for waiting for the server to start in the CI workflow.
 
 ## Authentication and JWT
 
