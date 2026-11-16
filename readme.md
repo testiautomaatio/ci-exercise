@@ -21,27 +21,25 @@ Tehtävän jälkeen osaat:
 
 ## GitHub actions -ympäristö
 
-Workflow:n tulee toimia GitHub Actionsin Linux-runnerilla. Työkalujen ja testien tulee siis toimia komentoriviltä Linux-ympäristössä. Tyypillisesti tämä ei ole ongelma, sillä samat kehitys- ja testaustyökalut toimivat usein eri käyttöjärjestelmissä.
+Workflow suoritetaan GitHub actionsissa Linux-ympäristössä. Valitsemiesi työkalujen ja kirjoittamiesi testien tulee siis toimia kyseisessä ympäristössä. Tyypillisesti samat kehitys- ja testaustyökalut toimivat eri käyttöjärjestelmissä, joten tämä ei toivottavasti aiheuta ongelmia.
 
 Voit käyttää graafisia käyttöliittymiä ja esimerkiksi VS Code -laajennoksia testien kirjoittamiseen ja kokeilemiseen omalla koneellasi. Kaikki GitHub actionsissa tapahtuvat komennot suoritetaan kuitenkin ilman graafista käyttöliittymää, joten varmista, että valitsemasi työkalu toimii komentoriviltä ja että sen riippuvuudet voidaan asentaa automaattisesti.
 
-Suosittelemme käyttämään kehitysympäristönä [GitHub Codespacesia](https://docs.github.com/en/codespaces/overview) tai paikallista [devcontaineria](https://code.visualstudio.com/docs/devcontainers/containers).
-
-Linux-pohjainen kehityskontti muistuttaa GitHub Actionsin Linux-runneria ja helpottaa riippuvuuksien asentamista eristettyyn ympäristöön.
+Suosittelemme käyttämään kehitysympäristönä [GitHub Codespacesia](https://docs.github.com/en/codespaces/overview) tai paikallista [devcontaineria](https://code.visualstudio.com/docs/devcontainers/containers). Nämä ratkaisut muistuttavat GitHub Actionsin ympäristöä.
 
 ## Testattava sovellus
 
-Testattava sovellus löytyy tästä repositoriosta [`app`-kansiossa](./app/README.md). Se tarjoaa yksinkertaisen REST-rajapinnan treenien (workout) hallintaan. Lue sovelluksen README:stä käynnistysohjeet, rajapinnan osoitteet ja odotettu toiminta.
+Testattava sovellus löytyy tästä repositoriosta [`app`-kansiosta](./app/README.md). Sovellus tarjoaa yksinkertaisen REST-rajapinnan treenien (workout) hallintaan. Lue sovelluksen [README:stä](./app/README.md) käynnistysohjeet, rajapinnan osoitteet ja kuvaus toiminnasta. Sovellus on tarkoitettu testattavaksi, joten se ei sisällä rekisteröitymistä eikä tietojen pysyvää tallentamista.
 
-Sovellus käyttää tietojen tallentamiseen paikallista muistia, joten sen toiminta alkaa nollasta jokaisella käynnistyksellä. Testit voivat muuttaa sovelluksen tilaa ja voit esimerkiksi lisätä, hakea ja poistaa niitä. Treenit eivät kuitenkaan säily eri käynnistysten välillä.
+Sovellus käyttää tietojen tallentamiseen paikallista muistia, joten sen toiminta alkaa nollasta jokaisella käynnistyksellä. Testisi voivat muuttaa sovelluksen tilaa ja voit esimerkiksi lisätä, hakea ja poistaa niitä. Data ei kuitenkaan säily eri käynnistysten välillä.
 
 ## Sovelluksen asentaminen ja käynnistäminen
 
-App-hakemistossa sijaitseva testattava sovellus on toteutettu Node.js:llä ja TypeScriptillä käyttäen Hono-frameworkia.
+App-hakemistossa sijaitseva sovellus on toteutettu [Node.js](https://nodejs.org/):llä ja [TypeScriptillä](https://www.typescriptlang.org/) käyttäen [Hono-frameworkia](https://honojs.dev/).
 
-Sinun ei tarvitse tutustua eikä muokata sovelluksen lähdekoodia, mutta voit halutessasi tehdä niin. Oleellista on, että saat sovelluksen käynnistettyä ja voit lähettää siihen HTTP-pyyntöjä. Sovellus voidaan käynnistää joko suoraan Node.js:llä tai Dockerilla. Valintasi mukaan siis asenna joko Node.js tai Docker.
+Sinun ei tarvitse lukea eikä muokata sovelluksen lähdekoodia, mutta voit halutessasi tehdä niin. Oleellista on, että saat sovelluksen käynnistettyä ja voit lähettää siihen HTTP-pyyntöjä. Sovellus voidaan käynnistää joko suoraan Node.js:llä tai vaihtoehtoisesti Dockerilla.
 
-Tarkemmat asennus- ja käyttöohjeet löytyvät [sovelluksen README:stä](./app/README.md). Lue se huolellisesti, sillä siinä on myös tietoa rajapinnan osoitteista, odotetuista vastauksista ja virhetilanteista. Sovelluksessa on myös käyttäjätunnukset ja salasanat, jotka löytyvät readme-tiedostosta.
+Tarkemmat asennus- ja käyttöohjeet löytyvät [sovelluksen README:stä](./app/README.md). Lue se huolellisesti, sillä siinä on myös tietoa rajapinnan osoitteista, odotetuista vastauksista ja virhetilanteista. Sovelluksessa on myös käyttäjätunnukset ja salasanat, jotka löytyvät samasta README-tiedostosta.
 
 ## Tehtävä
 
@@ -51,13 +49,18 @@ Tehtävä on jaettu eri vaiheisiin, joista saa osapisteitä. Suosittelemme etene
 
 GitHubin automaattiset CI-työnkulut eli actionsit määritellään YAML-tiedostoina repositorion `.github/workflows/`-hakemistossa. Tiedostoon määritellään kaikki työnkulkuun liittyvät vaiheet ja asetukset. Tehtävässä ei ole valmiina tarvittuja hakemistoja eikä yhtään workflow:ta, joten luo hakemistot ja tiedosto itse. Workflow-tiedoston nimellä ei ole merkitystä, kunhan se noudattaa [GitHubin vaatimuksia](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax).
 
-Aloita tutustumalla [GitHub actionsin dokumentaatioon](https://docs.github.com/en/actions). Suosittelemme tekemään ensin [quick start -dokumentin mukaisen workflown](https://docs.github.com/en/actions/get-started/quickstart) ja tarkistamaan, että saat sen toimimaan. Sen jälkeen voit muokata sitä sovelluksen käynnistämiseen ja testien suorittamiseen sopivaksi. Workflow-tiedoston nimellä ei ole merkitystä ja voit asettaa sen käynnistymään [esimerkiksi `push`- ja `workflow_dispatch`-tapahtumista](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#push). Käytä [GitHubin Linux-pohjaista runneria](https://docs.github.com/en/actions/reference/runners/github-hosted-runners), esimerkiksi `ubuntu-latest`, joka sisältää valmiiksi useita vaadittuja työkaluja.
+Aloita tutustumalla [GitHub actionsin dokumentaatioon](https://docs.github.com/en/actions). Suosittelemme tekemään ensin [quick start -dokumentin mukaisen workflown](https://docs.github.com/en/actions/get-started/quickstart) ja tarkistamaan, että saat sen toimimaan. Sen jälkeen voit muokata sitä sovelluksen käynnistämiseen ja testien suorittamiseen sopivaksi. Voit asettaa workflown käynnistymään [esimerkiksi `push`- ja `workflow_dispatch`-tapahtumista](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#push). Käytä [GitHubin Linux-pohjaista runneria](https://docs.github.com/en/actions/reference/runners/github-hosted-runners), esimerkiksi `ubuntu-latest`, joka sisältää valmiiksi useita vaadittuja työkaluja.
+
+```yaml
+# sisältää Node.js:n, Dockerin ja muita työkaluja valmiina
+runs-on: ubuntu-latest
+```
 
 **Automaattinen arviointi**
 
 Kun olet saanut workflow:n ajettua onnistuneesti, lisää siihen automaattiseen arviointiin vaadittavat kohdat.
 
-Aloita määrittelemällä tiedoston alkuun käyttöoikeudet, jotka sallivat workflow:n lukea repositorion sisällön ja kirjoittaa commitin statukseen tehtävästä saamasi pisteet:
+Aloita määrittelemällä tiedoston alkuun käyttöoikeudet, jotka sallivat workflow:n lukea repositorion tiedostot ja kirjoittaa tehtävästä saamasi pisteet commitin statukseen:
 
 ```diff
 + permissions:
@@ -65,7 +68,7 @@ Aloita määrittelemällä tiedoston alkuun käyttöoikeudet, jotka sallivat wor
 +   statuses: write
 ```
 
-Lisää työnkululle timeout, joka estää työnkulkua jäämästä jumiin, jos se kestää liian kauan. Lisää myös loppuun step, joka käynnistää automaattisen arvioinnin:
+Lisää työnkululle myös *timeout*, joka estää työnkulkua jäämästä jumiin, jos se kestää liian kauan. Lisää myös loppuun step, joka käynnistää automaattisen arvioinnin:
 
 ```diff
   # ...
@@ -83,6 +86,7 @@ Lisää työnkululle timeout, joka estää työnkulkua jäämästä jumiin, jos 
 
       steps:
         # ... muut vaiheet, kuten checkout, sovelluksen käynnistys ja testien suoritus ...
+
         - uses: actions/checkout@v7
 
         # Lisää viimeiseksi vaiheeksi automaattinen arviointi:
@@ -102,7 +106,7 @@ Testattava sovellus tulee käynnistää GitHub actionsissa, jotta testit voivat 
 
 **Suorittaminen taustalla**
 
-Huomaa, että sovellus tulee käynnistää *taustalle*, jotta GitHub actions voi jatkaa seuraaviin vaiheisiin ja suorittaa testit. Docker compose käynnistää palvelut taustalle automaattisesti jos käytät `-d`- tai `--detach`-vaihtoehtoa. Node.js:llä voit käyttää Bashin `&`-merkkiä, joka käynnistää komennon taustalle. Etsi tarpeen mukaan lisätietoa ja kokeile ratkaisuasi komentorivillä ennen sen lisäämistä workflow:hun.
+Huomaa, että sovellus tulee käynnistää *taustalle*, jotta GitHub actions voi jatkaa seuraaviin vaiheisiin ja suorittaa testit. Docker compose käynnistää palvelut taustalle automaattisesti jos käytät `-d`- tai `--detach`-vipua. Node.js:llä voit käyttää Bashin `&`-merkkiä, joka käynnistää komennon taustalle. Etsi tarpeen mukaan lisätietoa ja kokeile ratkaisuasi komentorivillä ennen sen lisäämistä workflow:hun.
 
 **Käynnistymisen odottaminen**
 
@@ -120,13 +124,15 @@ Aikaisemmin käyttämistämme testaustyökaluista esimerkiksi Playwright ei väl
 
 **REST/HTTP-pohjaiset testit**
 
-Vitestin avulla on mahdollista testata liki mitä tahansa, mutta joissain tapauksissa saatat haluta mieluummin juuri REST-rajapintojen testaamiseen tarkoitettuja työkaluja.[Robot Frameworkin laajennoksista](https://robotframework.org/#resources) löytyykin juuri HTTP-pyyntöjen tekemiseen tarkoitettuja kirjastoja, joiden avulla voit kirjoittaa testisi Robot-syntaksia ja -komentoja käyttäen.
+Vitestin avulla on mahdollista testata liki mitä tahansa, mutta joissain tapauksissa saatat haluta mieluummin juuri REST-rajapintojen testaamiseen tarkoitettuja työkaluja.[Robot Frameworkin laajennoksista](https://robotframework.org/#resources) löytyykin juuri HTTP-pyyntöjen tekemiseen tarkoitettuja kirjastoja, joiden avulla voit kirjoittaa testisi Robot-syntaksia ja -komentoja käyttäen. Toisaalta Robot Frameworkin syntaksi esimerkiksi JSON-olioiden käsittelyssä voi vaatia hieman totuttelua, jos olet tottunut kirjoittamaan perinteisillä ohjelmointikielillä.
 
 Lisäksi monet muut avoimen lähdekoodin työkalut, kuten [Bruno](https://www.usebruno.com/), tukevat HTTP-pyyntöjen tekemistä ja vastausten tarkistamista. Brunon vahvuuksiin kuuluvat mm. suoraviivainen komentorivikäyttö sekä paikallisesti että GitHub actionsissa.
 
 **GitHub actions -työnkulut, laajennokset ja pilvipalvelut**
 
-Eri työkaluihin tutustuessasi saatat törmätä erilaisiin kaupallisiin sekä avoimen lähdekoodin GitHub actions -työnkulkuihin, laajennoksiin ja pilvipalveluihin, jotka tarjoavat erilaisia ratkaisuja testien suorittamiseen. Suhtaudu tarjontaan kriittisesti ja pyri valitsemaan sellainen työkalu, joka ei edellytä ylimääräisiä asennuksia, kirjautumisia tai muita toimenpiteitä. Ideaalitapauksessa valitsemasi työkalu suorittaa testit samalla tavalla sekä paikallisesti että GitHub actionsissa.
+Eri työkaluihin tutustuessasi saatat törmätä erilaisiin kaupallisiin sekä avoimen lähdekoodin GitHub actions -työnkulkuihin, laajennoksiin ja pilvipalveluihin, jotka tarjoavat erilaisia ratkaisuja testien suorittamiseen.
+
+Suhtaudu tarjontaan kriittisesti ja pyri valitsemaan sellainen työkalu, joka ei edellytä tarpeettomia asennuksia, kirjautumisia tai muita toimenpiteitä. Ideaalitapauksessa valitsemasi työkalu suorittaa testit samalla tavalla sekä paikallisesti että GitHub actionsissa.
 
 ### 4. Testien kirjoittaminen suorittaminen: perustapaukset (10 * 3 %)
 
@@ -134,28 +140,28 @@ Kirjoita testit, jotka tarkistavat sovelluksen rajapinnan toimintaa eri tilantei
 
 Lisää GitHub actions -workflow:hun vaihe, joka asentaa testiesi riippuvuudet ja suorittaa testit. Varmista, että olet myös lisännyt kaikki testaukseen tarvittavat tiedostot ja asetukset repositorioon, jotta testit voidaan suorittaa GitHub actionsissa.
 
-Suosittelemme, että testaat esimerkiksi ensin palvelimen juuressa olevan päätepisteen `GET /` ja `GET /health`, jotka eivät vaadi autentikointia. Näistä saat jo osan pisteistä. Voit myös testata autentikointia vaativat päätepisteet ilman autentikointia, jolloin saat testattua, että palvelin palauttaa `401 Unauthorized` -tilakoodin.
+Suosittelemme, että testaat esimerkiksi ensin palvelimen juuressa olevan päätepisteen `GET /` ja `GET /health`, jotka eivät vaadi autentikointia. Näistä saat jo osan pisteistä. Voit myös testata autentikointia vaativat päätepisteet ilman autentikointia, jolloin saat testattua, että palvelin palauttaa `401 Unauthorized` -tilakoodeja.
 
-Kun saat nämä testit toimimaan GitHub actionsissa, kannattaa siirtyä testaamaan autentikointia vaativia päätepisteitä kirjautumalla ensin sisään ja käyttämällä saamaasi tokenia. Autentikointia ja tokenia koskevat ohjeet löytyvät [sovelluksen README:stä](./app/README.md).
+Kun saat nämä testit toimimaan GitHub actionsissa, kannattaa siirtyä testaamaan autentikointia vaativia päätepisteitä. Toteuta testin alussa kirjautuminen, ja käytä saamaasi tokenia seuraavissa kutsuissa. Autentikointia ja tokenia koskevat ohjeet löytyvät [sovelluksen README:stä](./app/README.md).
 
 | Päätepiste | Testattavat tilanteet |
 | --- | --- |
 | `GET /` | Tervetuloviesti JSON-muodossa ja `200`. |
 | `GET /health` | Ilman kirjautumista palautuu `200` ja vastaus kertoo kyseessä olevan esimerkinomainen tarkistus. |
-| `POST /auth/login` | Oikeilla tunnuksilla palautuu token; väärillä tunnuksilla `401`. Virheellinen JSON sekä puuttuvat tai väärän tyyppiset kentät palauttavat `400`. |
-| `GET /workouts` | Kirjautuneena palautuu lista; varmista, että luotu workout näkyy siinä ja poistettu ei enää näy. |
-| `POST /workouts` | Kelvollisilla tiedoilla palautuu `201`, luotu workout ja sen ID. Virheelliset syötteet palauttavat `400`. |
+| `POST /auth/login` | Oikeilla tunnuksilla palautuu token; väärillä tunnuksilla `401`. Virheellinen JSON-syntaksi tai virheelliset kentät palauttavat `400`. |
+| `GET /workouts` | Kirjautuneena palautuu lista harjoituksista. Varmista, että luotu workout näkyy siinä ja poistettu ei enää näy. Kukin käyttäjä voi nähdä vain omat harjoituksensa. |
+| `POST /workouts` | Kelvollisilla tiedoilla palautuu `201`, luotu workout ja sen saama uusi ID. Virheelliset syötteet palauttavat `400`. |
 | `GET /workouts/:id` | Luotu workout löytyy ID:llä ja sen tiedot ovat oikein. Tuntematon ID palauttaa `404`. Jos workout kuuluu toiseen käyttäjään, palauttaa `404`. |
-| `PUT /workouts/:id` | Kelvollinen päivitys palauttaa `200`, säilyttää ID:n ja muuttaa tiedot myös myöhemmässä haussa. Virheelliset syötteet palauttavat `400`, tuntematon ID tai eri käyttäjän datan muokkausyritys palauttavat `404`. |
+| `PUT /workouts/:id` | Kelvollinen päivitys palauttaa `200`. Virheelliset syötteet palauttavat `400`, tuntematon ID tai eri käyttäjän datan muokkausyritys palauttavat `404`. |
 | `DELETE /workouts/:id` | Luodun workoutin poisto palauttaa `204` ja tyhjän vastauksen. Tuntematon ID tai eri käyttäjän datan poistoyritys palauttaa `404`. |
 
-### 5. Testien kirjoittaminen suorittaminen: virhetilanteet (10 * 3 %)
+### 5. Testien kirjoittaminen suorittaminen: negatiiviset tapaukset (10 * 3 %)
 
-Onnistuneiden pyyntöjen lisäksi testien tulee tarkistaa myös virhetilanteita. Testaa esimerkiksi eri pyyntöjen yhteydessä puuttuvia kenttiä, tyhjää nimeä, virheellistä kestoa ja virheellistä JSONia. Varmista, ettei epäonnistunut päivitys muuta tallennettuja tietoja.
+Onnistuneiden pyyntöjen lisäksi testien tulee tarkistaa myös virhetilanteita. Testaa esimerkiksi eri pyyntöjen yhteydessä puuttuvia kenttiä, tyhjää nimeä, virheellistä kestoa ja virheellistä JSON:ia. Varmista, ettei epäonnistunut päivitys muuta tallennettuja tietoja.
 
 Tarkista lisäksi, että autentikointia vaativat päätepisteet palauttavat `401 Unauthorized`, jos pyyntö lähetetään esimerkiksi ilman tokenia.
 
-Käytä testeissäsi molempia käyttäjätunnuksia, jotta voit varmistaa, että käyttäjät eivät voi nähdä, muokata tai poistaa toistensa tietoja. Voit luoda molemmille käyttäjille kirjautumistokenit ja testata, että toisella tokenilla luotu treeni ei ole toisen käyttäjän luettavissa, muokattavissa tai poistettavissa.
+Käytä testeissäsi [molempia käyttäjätunnuksia](./app/README.md), jotta voit varmistaa, että käyttäjät eivät voi nähdä, muokata tai poistaa toistensa tietoja. Voit luoda molemmille käyttäjille kirjautumistokenit ja testata, että toisella tokenilla luotu data ei ole toisen käyttäjän luettavissa, muokattavissa tai poistettavissa.
 
 ## Tehtävän lähettäminen ja arviointi
 
