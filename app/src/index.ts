@@ -40,7 +40,7 @@ const workouts = new Map<string, Workout>();
 const jwtSecret = randomBytes(32).toString('hex');
 
 // Write logs to a file, where they can be inspected during autograding
-const logFile = openSync(process.env.APP_LOG_PATH ?? new URL('../app.log', import.meta.url), 'a');
+const logFile = openSync(process.env.APP_LOG_PATH ?? new URL('../logs/app.log', import.meta.url), 'a');
 
 // Check if the app is running in GitHub Actions environment
 const isGitHubActions = process.env.GITHUB_ACTIONS === 'true';
@@ -185,6 +185,13 @@ app.post('/workouts', async (c) => {
 
 app.put('/workouts/:id', async (c) => {
   const id = c.req.param('id');
+  const data = await readWorkout(c);
+
+  if (!data) {
+    log(`Invalid workout data for update`);
+    return c.json({ error: 'Invalid workout' }, 400);
+  }
+
   const existingWorkout = workouts.get(id);
   if (existingWorkout?.username !== authenticatedUsername(c)) {
     if (existingWorkout) {
@@ -195,11 +202,6 @@ app.put('/workouts/:id', async (c) => {
     return c.json({ error: 'Workout not found' }, 404);
   }
 
-  const data = await readWorkout(c);
-  if (!data) {
-    log(`Invalid workout data for update`);
-    return c.json({ error: 'Invalid workout' }, 400);
-  }
   const workout = { ...existingWorkout, ...data };
   workouts.set(id, workout);
   return c.json(workout);

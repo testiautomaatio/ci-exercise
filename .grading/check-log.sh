@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-log_file=app/app.log
+log_file=app/logs/app.log
 pattern="$1"
 use_regex="${2:-false}"
 

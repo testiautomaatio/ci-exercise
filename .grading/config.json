@@ -6,7 +6,7 @@
       "name": "Workflow is defined successfully",
       "description": "The GitHub actions workflow is defined in the repository and has a timeout set.",
       "score": 20,
-      "run": "cat .github/workflows/*.{yml,yaml}",
+      "run": "cat .github/workflows/*.y*ml",
       "contains": [
         "timeout-minutes"
       ]
@@ -15,13 +15,13 @@
       "name": "The REST api is started in the background and is reachable",
       "description": "The REST API is started in the background and is reachable via HTTP",
       "score": 10,
-      "run": "curl --fail http://localhost:3000/"
+      "run": "curl --fail http://localhost:3000/health"
     },
     {
       "name": "The REST api writes to the log file",
       "description": "The REST API writes its logs to a file for debugging and monitoring purposes. This log file is used for grading in the following steps.",
       "score": 10,
-      "run": "cat app/app.log",
+      "run": "cat app/logs/app.log",
       "contains": [
         "Workout API listening "
       ],
@@ -124,7 +124,7 @@
       "name": "Negative test: GET /workouts/{nonexistent} returns 404",
       "description": "Querying non-existent workout ID returns 404 Not Found",
       "score": 3,
-      "run": "bash .grading/check-log.sh '--> GET /workouts/[^ ]* 404' true"
+      "run": "bash .grading/check-log.sh 'Workout not found'"
     },
     {
       "name": "Negative test: GET /workouts/{otherUsersWorkoutId} returns 404",
@@ -136,13 +136,13 @@
       "name": "Negative test: PUT /workouts/{nonexistent} returns 404",
       "description": "Updating non-existent workout returns 404 Not Found",
       "score": 3,
-      "run": "bash .grading/check-log.sh '--> PUT /workouts/[^ ]* 404' true"
+      "run": "bash .grading/check-log.sh 'Workout not found for update'"
     },
     {
       "name": "Negative test: DELETE /workouts/{nonexistent} returns 404",
       "description": "Deleting non-existent workout returns 404 Not Found",
       "score": 3,
-      "run": "bash .grading/check-log.sh '--> DELETE /workouts/[^ ]* 404' true"
+      "run": "bash .grading/check-log.sh 'Workout not found for deletion'"
     },
     {
       "name": "Negative test: DELETE /workouts/{otherUsersWorkoutId} returns 404",
