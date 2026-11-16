@@ -107,6 +107,7 @@ app.post('/auth/login', async (c) => {
     return c.json(invalidCredentials, 401);
   }
 
+  log(`User ${user.username} logged in successfully`);
   const token = await sign({ sub: user.username, exp: Math.floor(Date.now() / 1000) + sessionLifetimeSeconds }, jwtSecret, 'HS256');
   return c.json({ token });
 });
@@ -163,7 +164,7 @@ app.get('/workouts/:id', (c) => {
   };
 
   if (workout.username !== authenticatedUsername(c)) {
-    log(`User ${authenticatedUsername(c)} attempted to access workout ${workout.id} owned by ${workout.username}`);
+    log(`User tried to access a workout owned by another user: ${workout.id} owned by ${workout.username}`);
     // use status code 404 to avoid revealing the existence of the workout to unauthorized users
     return c.json(notFound, 404);
   }
@@ -173,7 +174,9 @@ app.get('/workouts/:id', (c) => {
 
 app.post('/workouts', async (c) => {
   const data = await readWorkout(c);
-  if (!data) return c.json({ error: 'Invalid workout' }, 400);
+  if (!data) {
+    return c.json({ error: 'Invalid workout' }, 400)
+  };
 
   const workout = { ...data, id: randomUUID(), username: authenticatedUsername(c) };
   workouts.set(workout.id, workout);
@@ -210,7 +213,7 @@ app.delete('/workouts/:id', (c) => {
     return c.json({ error: 'Workout not found' }, 404);
   }
   if (workout?.username !== authenticatedUsername(c)) {
-    log(`User ${authenticatedUsername(c)} attempted to delete workout ${workout.id} owned by ${workout.username}`);
+    log(`User attempted to delete workout owned by another user: ${workout.id} owned by ${workout.username}`);
     return c.json({ error: 'Workout not found' }, 404);
   }
   workouts.delete(id);
