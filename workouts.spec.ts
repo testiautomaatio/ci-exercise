@@ -26,21 +26,62 @@ test.describe('endpoints requiring authentication', () => {
     };
 
     test.beforeAll(async () => {
-        tokens.xkcd = await login('xkcd', passwords.xkcd);
-        tokens.spaceballs = await login('spaceballs', passwords.spaceballs);
+        tokens.xkcd = (await login('xkcd', passwords.xkcd))[1].token;
+        tokens.spaceballs = (await login('spaceballs', passwords.spaceballs))[1].token;
+    });
+
+    test('POST /workouts creates a workout for the authenticated user', async () => {
+        const [status, workout] = await post('/workouts', tokens.xkcd, { name: 'Morning run', durationMinutes: 30 });
+        expect(status).toBe(201);
+        expect(workout).toEqual({
+            id: expect.any(String),
+            username: 'xkcd',
+            name: 'Morning run',
+            durationMinutes: 30
+        });
+    });
+
+    test('POST /workouts returns 400 for invalid workout data', async () => {
+        const [status1] = await post('/workouts', tokens.xkcd, { name: '', durationMinutes: 30 });
+        expect(status1).toBe(400);
+
+        const [status3] = await post('/workouts', tokens.xkcd, { foo: 'bar' });
+        expect(status3).toBe(400);
+
+        const [status4] = await post('/workouts', tokens.xkcd, { durationMinutes: 30 });
+        expect(status4).toBe(400);
     });
 
     test('GET /workouts returns only the workouts of the authenticated user', async () => {
-        const xkcdWorkouts = await get('/workouts', tokens.xkcd);
+        const [status1] = await post('/workouts', tokens.xkcd, { name: 'XKCD', durationMinutes: 30 });
+        const [status2] = await post('/workouts', tokens.spaceballs, { name: 'Spaceball', durationMinutes: 31 });
+
+        expect(status1).toBe(201);
+        expect(status2).toBe(201);
+
+        const [, xkcdWorkouts] = await get('/workouts', tokens.xkcd);
+        expect(xkcdWorkouts.length).toBeGreaterThan(0);
         expect(xkcdWorkouts.every((w: any) => w.username === 'xkcd')).toBe(true);
 
-        const spaceballsWorkouts = await get('/workouts', tokens.spaceballs);
+        const [, spaceballsWorkouts] = await get('/workouts', tokens.spaceballs);
+        expect(spaceballsWorkouts.length).toBeGreaterThan(0);
         expect(spaceballsWorkouts.every((w: any) => w.username === 'spaceballs')).toBe(true);
+    });
+
+    test('GET /workouts/:id returns 404 for a workout that does not belong to the authenticated user', async () => {
+        const [, workout] = await post('/workouts', tokens.xkcd, { name: 'XKCD', durationMinutes: 30 });
+        const [status] = await get(`/workouts/${workout.id}`, tokens.spaceballs);
+        expect(status).toBe(404);
+    });
+
+    test('GET /workouts/:id returns 404 for a workout that does not exist', async () => {
+        const [status] = await get(`/workouts/nonexistent`, tokens.xkcd);
+        expect(status).toBe(404);
     });
 });
 
 
-async function login(username: string, password: string): Promise<string> {
+async function login(username: string, password: string): Promise<[number, any]> {
     const response = await fetch(BASE + '/auth/login', {
         method: 'POST',
         headers: {
@@ -48,21 +89,28 @@ async function login(username: string, password: string): Promise<string> {
         },
         body: JSON.stringify({ username, password })
     });
-    if (!response.ok) {
-        throw new Error(`Login failed with status ${response.status}`);
-    }
-    return (await response.json()).token;
+    return [response.status, await response.json()];
 }
 
-async function get(path: string, token: string): Promise<any> {
+async function get(path: string, token: string): Promise<[number, any]> {
     const response = await fetch(BASE + path, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`
         }
     });
-    if (!response.ok) {
-        throw new Error(`GET failed with status ${response.status}`);
-    }
-    return response.json();
+    return [response.status, await response.json()];
+}
+
+async function post(path: string, token: string, body: any): Promise<[number, any]> {
+    const response = await fetch(BASE + path, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    return [response.status, await response.json()];
 }
