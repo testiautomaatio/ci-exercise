@@ -4,7 +4,7 @@ Tässä dokumentissa käsitellään lyhyesti eri testaustyökalujen valintaa ja 
 
 ## JavaScript- tai TypeScript-pohjaiset testit
 
-Aikaisemmin käyttämistämme testaustyökaluista esimerkiksi Playwright ei välttämättä ole tällä kertaa suositeltava  valinta, sillä se on tarkoitettu pääasiassa selainpohjaisten käyttöliittymien testaamiseen, ja tällä kertaa testaamme REST-rajapintaa. Sen sijaan [Vitest](https://vitest.dev/) tukee Playwrightin kaltaisia testejä, joissa testit voidaan kirjoittaa JavaScriptillä tai TypeScriptillä.
+Aikaisemmin käyttämistämme testaustyökaluista esimerkiksi Playwright on suunniteltu erityisesti selainpohjaisten käyttöliittymien testaamiseen, mutta se sisältää myös [työkaluja REST-rajapintojen testaamiseen](https://playwright.dev/docs/api-testing). Lisäksi esimerkiksi [Vitest](https://vitest.dev/) ja Jest tukevat Playwrightin kaltaisia testejä, joissa testit voidaan kirjoittaa JavaScriptillä tai TypeScriptillä.
 
 HTTP-pyynnöt voidaan Vitestin kanssa tehdä tavanomaisesti esimerkiksi [`fetch`-funktiolla](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/fetch) ja vastaukset voidaan tarkistaa Vitestin [`expect`-funktiolla](https://vitest.dev/api/expect.html).
 
