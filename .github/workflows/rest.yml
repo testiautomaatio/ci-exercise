@@ -15,24 +15,38 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v7
 
+#      Alternatively, you can use Docker Compose to start the REST API in a
+#      container. Uncomment the following lines if you prefer that approach.
+#
 #      - name: Start the REST API
-#        run: docker compose -f app/compose.yaml up --detach
-
+#        run: docker compose up --detach
+#        working-directory: app
 
       - name: install app dependencies
-        run: npm --prefix app install
+        run: npm install
+        working-directory: app
 
-      - name: run the app tests
-        run: npm --prefix app start &
+      - name: run the app in the background
+        run: npm start &
+        working-directory: app
 
       - name: Wait for the REST API to be ready
         run: curl --retry 10 --retry-delay 5 --retry-all-errors http://localhost:3000/health
 
-      - name: Install dependencies
-        run: npm install
+      # Example of running tests using Bruno
+      - name: Setup Bruno and run tests
+        run: npm install && npx bru run
+        working-directory: tests-bruno
 
-      - name: Run tests
-        run: npm test
+      # Example of running tests using Vitest
+      - name: Setup Vitest and run tests
+        run: npm install && npx vitest run
+        working-directory: tests-vitest
+
+      # Example of installing Robot and running tests using Robot Framework
+      - name: Setup Robot Framework and run tests
+        run: pip install robotframework robotframework-requests && robot *.robot
+        working-directory: tests-robot
 
       - name: Autograding
         if: always()

@@ -1,0 +1,40 @@
+info:
+  name: successful authentication
+  type: http
+
+http:
+  method: POST
+  url: http://localhost:3000/auth/login
+  body:
+    type: json
+    data: |-
+      {
+        "username": "spaceballs",
+        "password": "12345"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+    - expression: res.body
+      operator: isJson
+    - expression: res.body.token
+      operator: isString
+  actions:
+    - type: set-variable
+      phase: after-response
+      selector:
+        expression: res.body.token
+        method: jsonq
+      variable:
+        name: accessToken
+        scope: runtime
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
