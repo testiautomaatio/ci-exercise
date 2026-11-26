@@ -1,17 +1,12 @@
 import { test, expect, APIRequestContext, request } from '@playwright/test';
 
 const users = {
-    xkcd: {
-        username: `xkcd`,
-        password: `correct horse battery staple`
-    },
-    spaceballs: {
-        username: `spaceballs`,
-        password: `12345`
-    }
+    xkcd: { username: `xkcd`, password: `correct horse battery staple` },
+    spaceballs: { username: `spaceballs`, password: `12345` }
 };
 
 type User = typeof users.xkcd;
+
 type Workout = {
     id?: string;
     username?: string;
@@ -31,7 +26,7 @@ test.describe('public endpoints', () => {
     });
 });
 
-test.describe('authentication /auth/login', () => {
+test.describe('/auth/login', () => {
     test('login with valid credentials returns a token', async ({ request }) => {
         const resp = await request.post(`/auth/login`, { data: users.xkcd });
 
@@ -235,13 +230,21 @@ test.describe('/workouts', () => {
     });
 });
 
+/**
+ * Creates a new APIRequestContext for the given user by logging
+ * in and storing the token in the context's headers. This allows
+ * us to make authenticated requests as that user without having
+ * to set the Authorization header manually for each request.
+ */
 async function setupUserContext(user: User): Promise<APIRequestContext> {
+    // first, create a new context where we can log in and get a token
     const ctx = await request.newContext();
     const resp = await ctx.post('/auth/login', { data: user });
 
     expect(resp.ok()).toBe(true);
     expect(await resp.json()).toHaveProperty('token');
 
+    // then, create and return a new context with the token in the headers
     return await request.newContext({
         extraHTTPHeaders: {
             'Authorization': `Bearer ${(await resp.json()).token}`
@@ -249,6 +252,10 @@ async function setupUserContext(user: User): Promise<APIRequestContext> {
     });
 }
 
+/**
+ * Creates a new workout for the given user context. This is a helper function
+ * to avoid repeating the same code in multiple tests, where workouts are needed.
+ */
 async function createWorkout(ctx: APIRequestContext, workout: Workout): Promise<Workout> {
     const resp = await ctx.post(`/workouts`, { data: workout });
     expect(resp.ok()).toBe(true);
