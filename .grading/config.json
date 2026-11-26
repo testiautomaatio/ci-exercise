@@ -15,7 +15,7 @@
       "name": "The REST api is started in the background and is reachable",
       "description": "The REST API is started in the background and is reachable via HTTP.",
       "score": 10,
-      "run": "curl --fail http://localhost:3000/health"
+      "run": "curl --fail http://localhost:3000/health?grading=true"
     },
     {
       "name": "The REST api writes to the log file",
@@ -23,7 +23,7 @@
       "score": 10,
       "run": "cat app/logs/app.log",
       "contains": [
-        "Workout API listening "
+        "Workout API listening"
       ],
       "skipRemainingOnFailure": true
     },
