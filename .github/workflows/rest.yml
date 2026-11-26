@@ -48,6 +48,11 @@ jobs:
         run: pip install robotframework robotframework-requests && robot *.robot
         working-directory: tests-robot
 
+      # Example of running tests using Playwright
+      - name: Setup Playwright and run tests
+        run: npm install && npx playwright test
+        working-directory: tests-playwright
+
       - name: Autograding
         if: always()
         uses: ohjelmistokehitys/autograder@v0
